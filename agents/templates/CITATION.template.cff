@@ -1,0 +1,29 @@
+# This CITATION.cff file lets others cite your project in academic papers.
+# Docs: https://citation-file-format.github.io/
+
+cff-version: 1.2.0
+title: "Project Name"
+message: "If you use this software, please cite it using these metadata."
+type: software
+
+# Version MUST match composer.json / package.json
+version: "1.0.0"
+date-released: "YYYY-MM-DD"
+
+# At least one author is required
+authors:
+  - given-names: "First"
+    family-names: "Last"
+    email: "author@example.com"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"  # optional
+
+# Project URL — use the GitHub repo
+repository-code: "https://github.com/OWNER/REPO"
+
+# Optional but recommended
+# url: "https://project-website.com"
+# license: "MIT"
+# abstract: "One paragraph describing what the software does."
+# keywords:
+#   - keyword-one
+#   - keyword-two
