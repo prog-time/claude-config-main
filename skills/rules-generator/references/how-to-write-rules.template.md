@@ -6,7 +6,8 @@ with the rules it defines.
 ```markdown
 # Rules for Writing Rules
 
-> Purpose: This file defines the standard every rules file in this project must meet. It is self-referential — it must itself comply with the rules it defines.
+> Purpose: This file defines the standard every rules file in this project must meet.
+> It is self-referential — it must itself comply with the rules it defines.
 > Context: Read this file before creating or updating any rules in the `rules/` directory.
 > Version: 1.0
 

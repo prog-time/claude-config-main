@@ -3,7 +3,7 @@
 Produce EXACTLY this content. This file mandates a single Swagger-backed
 API contract; its rules apply regardless of project stack.
 
-```markdown
+````markdown
 # API Contract Rules
 
 > Context: Read this file before adding, modifying, or deleting any HTTP endpoint.
@@ -30,12 +30,14 @@ The entire API must be described in one file.
 **Location:** `rules/api/openapi.yaml`
 
 Correct
-```
+
+```text
 rules/api/openapi.yaml
 ```
 
 Incorrect
-```
+
+```text
 rules/api/endpoints/*.yaml
 rules/api/endpoints.md
 docs/api.md
@@ -62,6 +64,7 @@ Incorrect: free-text Markdown, hand-written tables, partial specs
 ## 4. Completeness rules (mandatory)
 
 Every endpoint must include:
+
 - summary
 - description
 - tags
@@ -170,6 +173,7 @@ components:
 ## 11. Validation rules (mandatory)
 
 Before merging changes:
+
 - Validate schema
 - Lint spec
 - Ensure Swagger UI loads
@@ -210,6 +214,7 @@ Never implement first.
 - Tests pass
 
 ## Forbidden behaviors
+
 - Markdown endpoint descriptions
 - Per-endpoint files
 - Missing schemas
@@ -221,6 +226,7 @@ Never implement first.
 - Divergence between code and spec
 
 ## Checklist
+
 - [ ] Single openapi.yaml exists
 - [ ] All routes documented
 - [ ] All params typed
@@ -231,4 +237,5 @@ Never implement first.
 - [ ] Side effects listed
 - [ ] Spec validates
 - [ ] Matches real behavior
-```
+
+````

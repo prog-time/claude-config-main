@@ -6,7 +6,9 @@ with real values reconstructed from migrations during Phase 0.
 ```markdown
 # Database Schema
 
-> Purpose: This file defines mandatory standards for documenting the database schema. It ensures that AI agents and developers fully understand data structure, relationships, and constraints before making changes.
+> Purpose: This file defines mandatory standards for documenting the database schema.
+> It ensures that AI agents and developers fully understand data structure,
+> relationships, and constraints before making changes.
 > Context: Read this file before creating or modifying tables, columns, indexes, or migrations.
 > Version: 1.0
 
