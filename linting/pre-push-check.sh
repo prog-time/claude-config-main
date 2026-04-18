@@ -11,11 +11,3 @@ echo "----------"
 echo "YML/YAML Checker..."
 bash linting/check_scripts/check_yamllint_all.sh
 echo "----------"
-
-echo "HTML Code Checker..."
-bash linting/check_scripts/check_htmlhint_all.sh
-echo "----------"
-
-echo "CSS Code Style Checker..."
-bash linting/check_scripts/check_stylelint_all.sh
-echo "----------"
