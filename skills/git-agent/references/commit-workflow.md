@@ -30,7 +30,7 @@ generated in this session.
 
 If the branch name does not match, **abort immediately**:
 
-```
+```text
 Error: commits require an 'issues-{N}' branch, got '{branch}'.
 Run /task_complete with a task spec, or switch to an existing
 'issues-{N}' branch.
@@ -65,7 +65,7 @@ Use this identity for every commit. Never override or modify it.
 
 If `user.name` or `user.email` is empty — warn and abort:
 
-```
+```text
 Warning: git author is not configured in this repository.
 Run:
   git config user.name "Your Name"
@@ -120,7 +120,7 @@ explicitly names them in their message (e.g. "commit data/export.csv").
 An override requires an explicit per-file or per-directory request — a
 general "commit everything" instruction does NOT count as an override.
 
-```
+```text
 .idea/
 data/
 logs/
@@ -224,7 +224,7 @@ After a successful commit, show:
 
 Changes:
 
-```
+```text
 src/auth/login.ts         — new functionality
 src/auth/token.ts         — new functionality
 tests/auth/login.test.ts  — test for login.ts
@@ -251,12 +251,12 @@ Always print a clear error message. Never fail silently.
 
 | Situation | Message |
 |-----------|---------|
-| Branch is not `issues-{N}` | `Error: commits require an 'issues-{N}' branch, got '{branch}'. Run /task_complete with a task spec, or switch to an existing 'issues-{N}' branch.` |
+| Branch is not `issues-{N}` | `Error: commits require 'issues-{N}' branch. Switch or run /task_complete.` |
 | No changes to commit | `Error: nothing to commit. Run 'git status' to see the current state.` |
 | Only whitespace changes | `Error: only whitespace changes detected — skipping commit.` |
-| File not found when staging | `Error: file not found: {filename} — skipping. Continuing with remaining files.` |
-| Pre-commit hook failure | `Error: pre-commit hook failed.\n{hook output}\nFix the issue or ask to skip the hook.` |
-| Commit rejected (protected branch) | `Error: commit rejected — branch '{branch}' may be protected.\n{git error output}` |
+| File not found when staging | `Error: file not found: {filename} — skipping. Continuing.` |
+| Pre-commit hook failure | `Error: pre-commit hook failed. Fix or ask to skip.` |
+| Commit rejected (protected branch) | `Error: commit rejected — branch '{branch}' may be protected.` |
 | Detached HEAD | `Warning: repository is in detached HEAD state. Committing may result in lost work.` |
 | git command not found | `Error: git is not installed or not in PATH.` |
 | Staging failed | `Error: failed to stage {filename}.\n{git error output}` |

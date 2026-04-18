@@ -35,13 +35,13 @@ Parse the user input, then pick exactly one mode:
 
 | Invocation | Mode | Reference |
 |---|---|---|
-| `commit`, `commit <lang>`, `commit <file1> <file2>` | **A. Atomic commit workflow** — stage + commit | `references/commit-workflow.md` |
-| `git-agent desc commit [lang]` | **B. Commit message only** (hook output) | `references/commit-message-rules.md` |
+| `commit` / `commit <lang>` / `commit <files>` | **A. Atomic commit workflow** | `references/commit-workflow.md` |
+| `git-agent desc commit [lang]` | **B. Commit message only** (hook) | `references/commit-message-rules.md` |
 | `git-agent desc pr [branch] -> [target]` | **C. PR description** | `references/pr-and-release.md` |
 | `git-agent desc release {version}` | **D. Release Notes** | `references/pr-and-release.md` |
-| `git-agent desc changelog {version}` | **E. Release Notes + prepend CHANGELOG.md** | `references/pr-and-release.md` |
-| `git-agent publish pr [branch] -> [target]` | **F. Generate PR + `gh pr create`** (asks confirmation) | `references/pr-and-release.md` |
-| `git-agent publish release {version}` | **G. Generate release + `gh release create`** (asks confirmation) | `references/pr-and-release.md` |
+| `git-agent desc changelog {version}` | **E. Release Notes + CHANGELOG** | `references/pr-and-release.md` |
+| `git-agent publish pr [branch] -> [target]` | **F. PR + `gh pr create`** (asks) | `references/pr-and-release.md` |
+| `git-agent publish release {version}` | **G. Release + `gh release create`** (asks) | `references/pr-and-release.md` |
 
 Load the relevant reference file **only** when entering its mode — not
 upfront. This keeps context lean.
@@ -65,13 +65,13 @@ The output is captured by a git hook and written directly to
 
 **Correct output (the whole response):**
 
-```
+```text
 issues-42|add password reset via email
 ```
 
 **Wrong output:**
 
-```
+```text
 Here is the generated commit message:
 
 issues-42|add password reset via email
@@ -143,7 +143,7 @@ Steps:
    `{N}` via `^issues-(\d+)$`. If the branch does not match, output
    **exactly** this single line and stop:
 
-   ```
+   ```text
    error: not on an issues-{N} branch
    ```
 
@@ -217,11 +217,11 @@ message text)*
 
 **Assistant:**
 
-```
+```text
 issues-42|add password reset via email
 ```
 
-*(Nothing else. The whole response is the message line.)*
+Nothing else. The whole response is the message line.
 
 ### Example 3 — Mode C (PR description)
 

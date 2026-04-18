@@ -36,7 +36,7 @@ the issue number extracted from the current branch.
 
 ### Abort message (Mode A)
 
-```
+```text
 Error: commits require an 'issues-{N}' branch, got '{branch}'.
 Run /task_complete with a task spec, or switch to an existing
 'issues-{N}' branch.
@@ -48,7 +48,7 @@ Mode B cannot print human-readable errors because stdout becomes the
 commit message. Output exactly this single line so the bad message is
 visible in the editor and the user can abort:
 
-```
+```text
 error: not on an issues-{N} branch
 ```
 
@@ -59,7 +59,7 @@ After the `issues-{N}|` prefix, start with a lowercase imperative verb:
 `move`, `rename`, `improve`, `refactor`, `migrate`, `configure`,
 `enable`, `disable`.
 
-```
+```text
 issues-42|add password reset via email
 issues-42|prevent duplicate job dispatch on retry
 issues-43|extract profile update into separate action
@@ -79,7 +79,7 @@ After the `issues-{N}|` prefix use past-tense active forms: «добавил»,
   «изменено»
 - Subject is omitted — start directly with the verb after the prefix.
 
-```
+```text
 issues-42|добавил сброс пароля через email
 issues-45|исправил дублирование задач в очереди
 issues-43|вынес обновление профиля в отдельный экшен
@@ -94,7 +94,7 @@ person, subject omitted.
 
 ## Examples of bad commit messages (never produce these)
 
-```
+```text
 feat(auth): add password reset            ← conventional-commit prefix
 add password reset via email              ← missing issues-{N}| prefix
 issues-12: add password reset             ← wrong separator (use |)
