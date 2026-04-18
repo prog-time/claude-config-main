@@ -179,7 +179,7 @@ automate? Examples: "commit changes", "create a task", "run tests".
 - **User wants a slash command, not a skill** — slash commands go in `commands/`.
   Suggest they check the Claude Code docs and handle that separately.
 - **User wants an agent, not a skill** — agents go in `agents/` as single `.md`
-  files. Point them to `agents/example.md` as a starting point.
+  files. Point them to the "Adding an agent" section of `CONTRIBUTING.md`.
 - **User provides phrasings only in one language but works bilingually** — ask for
   the other language's phrasings explicitly. Missing translations cause the skill to
   silently fail on the other language.

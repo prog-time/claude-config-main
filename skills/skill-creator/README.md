@@ -11,7 +11,7 @@ scope definition, trigger design, scaffolding, body writing, and trigger testing
 
 ## Does not trigger for
 
-- Creating **agents** — use `agents/` directly (see `agents/example.md`).
+- Creating **agents** — use `agents/` directly (see [`CONTRIBUTING.md`](../../CONTRIBUTING.md#adding-an-agent)).
 - Creating **slash commands** — use `commands/`.
 - Editing an **existing** skill — use Edit directly.
 
