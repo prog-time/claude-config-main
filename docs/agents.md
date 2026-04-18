@@ -34,3 +34,24 @@ agent of the same name.
   agent.
 - Do not give the agent more tools than it needs (`tools:` in frontmatter).
 - Do not call agents recursively without a clear exit condition.
+
+## Agent file layout
+
+Claude Code only discovers agents from `.md` files at the top level of
+`agents/`. Subdirectories are never scanned for agent definitions. This
+dictates the layout:
+
+- **Simple agent:** a single file `agents/<name>.md`. No directory.
+- **Agent with private resources** (stack profiles, reference snippets,
+  prompts loaded on demand): a file `agents/<name>.md` **plus** a
+  directory `agents/<name>/` of the same name, read by the agent itself
+  via `Read`. Example: `agents/backend-agent.md` +
+  `agents/backend-agent/{php,python}.md`.
+- **Shared export assets** (README/CHANGELOG/PR templates that the agent
+  copies into *other* projects) do not belong under `agents/`. They
+  live in the repo-root `templates/` directory — shared and
+  discoverable by any skill or agent.
+
+This is the agent equivalent of the `skills/<name>/references/` pattern
+skills use. The difference is cosmetic: the `.md` stays at the top
+level because the platform requires it.
