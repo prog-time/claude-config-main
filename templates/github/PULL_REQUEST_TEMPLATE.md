@@ -1,56 +1,30 @@
-## What does this PR do?
+## Summary
 
-<!-- One or two sentences describing the change. -->
+<!-- One or two sentences: what changed and why. -->
 
-## Related issue
+## Linked issues
 
 <!--
-    Link the issue this PR addresses.
-    Use "Closes #123" to auto-close the issue when the PR is merged.
+    Use "Closes #N" to auto-close the linked issue on merge.
+    List every related issue on its own line.
+    Example:
+        Closes #42
+        Related to #51
 -->
 
 Closes #
 
-## Type of change
-
-<!--
-    Put an X in the boxes that apply.
--->
-
-- [ ] Bug fix (non-breaking change that fixes an issue)
-- [ ] New feature (non-breaking change that adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] Documentation update
-- [ ] Refactoring (no functional changes)
-
 ## Checklist
 
-<!--
-    Put an X in each box when you've completed the step.
-    All items must be checked before the PR can be merged.
--->
+- [ ] Tests pass locally
+- [ ] Docs / CHANGELOG updated if behavior changed
+- [ ] No leftover debug code, prints, or stale TODOs
+- [ ] Breaking changes flagged in the summary
 
-### Code quality
+## Notes for reviewer
 
-- [ ] My code follows the project's code style (linters pass without errors)
-- [ ] Static analyzers pass without new errors (PHPStan / tsc / Mypy)
-- [ ] I ran all linters and analyzers locally before pushing
+<!-- Optional: trade-offs, areas of uncertainty, screenshots, migration steps. -->
 
-### Testing
+---
 
-- [ ] I added tests that cover my changes
-- [ ] New and existing tests pass locally
-- [ ] Test coverage for new code is at least 90%
-
-### Documentation
-
-- [ ] I updated the documentation to reflect my changes (if applicable)
-- [ ] README / CHANGELOG / CONTRIBUTING are up to date (if applicable)
-
-## Screenshots / recordings
-
-<!-- If the change has a visual component, add screenshots or a GIF here. -->
-
-## Notes for reviewers
-
-<!-- Anything the reviewer should pay attention to, trade-offs made, areas of uncertainty. -->
+_The task was generated using the MCP server — [prog-time/mcp-github-issues](https://github.com/prog-time/mcp-github-issues)._

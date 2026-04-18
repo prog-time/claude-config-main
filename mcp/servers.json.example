@@ -1,14 +1,14 @@
 {
   "mcpServers": {
     "mcp-github-issues": {
-      "command": "/Users/ilalasuk/.nvm/versions/node/v18.20.5/bin/node",
+      "command": "<NODE_BIN_PATH>",
       "args": [
-        "/Users/ilalasuk/Documents/projects/MCP/mcp-github-issues/node_modules/.bin/tsx",
-        "/Users/ilalasuk/Documents/projects/MCP/mcp-github-issues/src/server.ts"
+        "<MCP_GITHUB_ISSUES_PATH>/node_modules/.bin/tsx",
+        "<MCP_GITHUB_ISSUES_PATH>/src/server.ts"
       ],
       "env": {
-        "GITHUB_TOKEN": "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"
+        "GITHUB_TOKEN": "<GITHUB_TOKEN>"
       }
-    },
+    }
   }
 }
