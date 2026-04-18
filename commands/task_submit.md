@@ -45,6 +45,7 @@ Absent these, `/task_submit` falls back to standalone behaviour
 **Capture:** `issue_number` (integer `{N}`), `branch` (string).
 
 **Failure modes:**
+
 - Branch does not match `issues-{N}` → STOP with
   `error-templates.md#branch-not-issues` (`current=<branch>`).
 - `issue_number_expected` was supplied and differs from `{N}` →
@@ -75,6 +76,7 @@ commit count (remote will be created on push).
 `git status --porcelain` being non-empty).
 
 **Failure modes:**
+
 - `git fetch` network / auth failure → STOP with
   `error-templates.md#push-rejected` (`branch=issues-{N}`,
   `error=<verbatim>`). (The template fits the recovery wording.)
@@ -99,6 +101,7 @@ commit count (remote will be created on push).
 created by `git-agent`, or `0` if skipped).
 
 **Failure modes:**
+
 - `git-agent` fails to produce a commit (hook rejection, signing
   error, lint failure) → STOP with
   `error-templates.md#commit-failed` (`error=<verbatim>`). Never
@@ -122,6 +125,7 @@ of commits just delivered (equal to Step 2 `ahead_count` plus
 `commits_added`).
 
 **Failure modes:**
+
 - `non-fast-forward` / rejected push → STOP with
   `error-templates.md#push-rejected` (`branch=issues-{N}`,
   `error=<verbatim>`). Never `--force` or `--force-with-lease`.
@@ -152,6 +156,7 @@ let the MCP reject duplicates.
 `pr_state` (`existing` | empty).
 
 **Failure modes:**
+
 - MCP call fails with something other than "not found" → STOP with
   `error-templates.md#mcp-call-failed`.
 
@@ -178,6 +183,7 @@ let the MCP reject duplicates.
 `existing` if reused).
 
 **Failure modes:**
+
 - MCP reports a duplicate PR error → re-query the project, capture
   the existing URL, set `pr_tag = "existing"`, continue to Step 8.
   Do not open a duplicate.
@@ -193,7 +199,7 @@ whose head is `issues-{issue_number}` and whose base is `main`.
 **Action:** emit the `task_submit` template from
 `_shared/report-templates.md`:
 
-```
+```text
 Branch:        issues-{issue_number}
 GitHub Issue:  #{issue_number}
 Commits:       {pushed_count} pushed
