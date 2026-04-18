@@ -64,7 +64,7 @@ Internal inventory to produce before writing:
 
 ### Step 2 — Create the mandatory directory structure
 
-```
+```text
 rules/
 ├─ README.md
 ├─ _meta/

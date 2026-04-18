@@ -116,7 +116,7 @@ memory: user
 
 ### 2. Role definition
 
-```
+```markdown
 You are a <Role Title>. Your role is to <one sentence: what you do and what you produce>.
 
 **You work with any project and any technology stack.** <one sentence on approach>.
@@ -162,7 +162,7 @@ structured reports.
 
 Use this template (replace `<name>`):
 
-```
+```markdown
 ## Persistent Agent Memory
 
 You have a persistent memory directory at the agent-memory path for <name>.
@@ -189,7 +189,7 @@ carefully.
 
 **Each example:**
 
-```
+```markdown
 <example>
 Context: [one sentence setting the scene]
 user: "[realistic user message]"

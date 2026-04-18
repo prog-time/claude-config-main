@@ -62,7 +62,7 @@ Identify which checks apply based on what the project actually has:
 ### Step 2 — Fetch reference patterns (mandatory)
 
 Before writing any YAML, fetch
-https://github.com/prog-time/workflows and read every available example.
+<https://github.com/prog-time/workflows> and read every available example.
 
 Extract:
 
@@ -82,7 +82,7 @@ proceed with standard GitHub Actions conventions as a fallback.
 
 Before writing YAML, produce the dependency plan. Example:
 
-```
+```text
 Jobs:
   lint             — no dependencies
   type-check       — no dependencies
@@ -136,7 +136,7 @@ If `.github/workflows/` already has files:
 
 ## Rules (non-negotiable)
 
-- **Always fetch https://github.com/prog-time/workflows first.** No YAML
+- **Always fetch <https://github.com/prog-time/workflows> first.** No YAML
   may be generated before this fetch completes. If the fetch fails,
   stop and ask the user.
 - **One job per check.** Lint is one job. Tests are one job (or
@@ -156,7 +156,7 @@ If `.github/workflows/` already has files:
 
 Produce a completion report:
 
-```
+```markdown
 ## CI Setup Complete
 
 **Stack detected:** [language, framework, package manager]
