@@ -110,7 +110,34 @@ created by `git-agent`, or `0` if skipped).
 **Invariants after:** working tree is clean; branch has at least
 one commit not on `origin/issues-{N}`.
 
-### Step 4 — Push the branch
+### Step 4 — Run linting checks
+
+**Preconditions:** working tree clean (Step 3 complete).
+**Action:** check whether `linting/pre-push-check.sh` exists in the
+repo root:
+
+```bash
+bash linting/pre-push-check.sh
+```
+
+- Script **present** → run it. Capture its exit code.
+- Script **absent** → skip this step silently (`lint_status = skipped`).
+
+**Capture:** `lint_status` (`passed` | `skipped`).
+
+**Failure modes:**
+
+- Script exits non-zero → STOP with message verbatim:
+
+  ```text
+  Linting failed. Fix the issues reported above, then retry /task_submit.
+  Do not push with known lint errors.
+  ```
+
+**Invariants after:** code passes all linting checks, or no linting
+script is present.
+
+### Step 5 — Push the branch
 
 **Preconditions:** working tree clean; at least one unpushed
 commit.
@@ -134,7 +161,7 @@ of commits just delivered (equal to Step 2 `ahead_count` plus
 **Invariants after:** `origin/issues-{issue_number}` equals local
 `HEAD`.
 
-### Step 5 — Resolve the MCP project
+### Step 6 — Resolve the MCP project
 
 **Preconditions:** push succeeded.
 **Action:** apply the algorithm from
@@ -145,12 +172,12 @@ of commits just delivered (equal to Step 2 `ahead_count` plus
 MCP unavailable → STOP with
 `error-templates.md#mcp-not-connected` (`command=task_submit`).
 
-### Step 6 — Check for an existing PR
+### Step 7 — Check for an existing PR
 
 **Preconditions:** `project` resolved.
 **Action:** list PRs on the project whose `head` equals
 `issues-{issue_number}`. If `mcp-github-issues` exposes a direct
-PR-listing tool, use it; otherwise, attempt creation in Step 7 and
+PR-listing tool, use it; otherwise, attempt creation in Step 8 and
 let the MCP reject duplicates.
 **Capture:** `existing_pr_url` (string or empty),
 `pr_state` (`existing` | empty).
@@ -160,13 +187,13 @@ let the MCP reject duplicates.
 - MCP call fails with something other than "not found" → STOP with
   `error-templates.md#mcp-call-failed`.
 
-### Step 7 — Open the Pull Request (if needed)
+### Step 8 — Open the Pull Request (if needed)
 
-**Preconditions:** Step 6 captured `pr_state`.
+**Preconditions:** Step 7 captured `pr_state`.
 **Action:**
 
 - If `pr_state == "existing"` → set `pr_url = existing_pr_url` and
-  skip to Step 8.
+  skip to Step 9.
 - Otherwise → call the `mcp-github-issues` PR-creation tool with:
   - **head:** `issues-{N}` (current branch)
   - **base:** `main`
@@ -185,7 +212,7 @@ let the MCP reject duplicates.
 **Failure modes:**
 
 - MCP reports a duplicate PR error → re-query the project, capture
-  the existing URL, set `pr_tag = "existing"`, continue to Step 8.
+  the existing URL, set `pr_tag = "existing"`, continue to Step 9.
   Do not open a duplicate.
 - Any other MCP error → STOP with
   `error-templates.md#pr-create-failed` (`error=<verbatim>`).
@@ -193,9 +220,9 @@ let the MCP reject duplicates.
 **Invariants after:** `pr_url` is non-empty and points at a PR
 whose head is `issues-{issue_number}` and whose base is `main`.
 
-### Step 8 — Report
+### Step 9 — Report
 
-**Preconditions:** Steps 1–7 completed.
+**Preconditions:** Steps 1–8 completed.
 **Action:** emit the `task_submit` template from
 `_shared/report-templates.md`:
 
