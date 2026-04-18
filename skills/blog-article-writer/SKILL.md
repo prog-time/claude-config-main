@@ -106,7 +106,7 @@ Module structure: What → Why → How → Pitfalls.
 
 Always specify the language in the fence.
 
-````
+````markdown
 ```typescript
 const sortedItems = useMemo(() => {
   return items.sort((a, b) => a.price - b.price);
