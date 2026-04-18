@@ -48,7 +48,7 @@ These are provided by the `project-agent` MCP server. Call them as
 If `mcp__project-agent__*` tools are not available in the current session,
 stop and tell the user:
 
-```
+```text
 The mcp-github-issues MCP server is not connected. Register it with:
   ./mcp.sh setup            # from the mcp-github-issues repo
 Then reload this session.
@@ -72,21 +72,25 @@ The MCP requires a `project` argument that must match a key in
 1. Call `mcp__project-agent__list_projects` — this returns every configured
    project with its `owner`, `repo`, and `tasksDir`.
 2. Inspect the current repository:
+
    ```bash
    git remote get-url origin
    basename "$(git rev-parse --show-toplevel)"
    ```
+
 3. Match a project when **either** is true:
    - `owner/repo` from `projects.yaml` appears in the `origin` URL, or
    - The repo folder name equals the project's `repo` field.
 4. If exactly one match — use it silently.
 5. If multiple matches — ask the user which one, listing the candidates.
 6. If zero matches — do NOT invent a project name. Ask the user:
-   ```
+
+   ```text
    No project in projects.yaml matches this repository
    (origin: <url>). Which project should I use?
    Available: <comma-separated keys from list_projects>
    ```
+
 7. If `list_projects` returns an empty list — stop and tell the user to add
    their repo to `projects.yaml` first.
 
@@ -120,6 +124,7 @@ Ask: *"Draft saved to `<path>`. Review it and confirm when I should publish,
 or tell me what to change."*
 
 If the user asks for edits:
+
 - Small edits → use the `Edit` tool on the draft file directly.
 - Large rewrites → call `create_task_draft` again with new inputs; then
   offer to delete the old draft via `Bash` (`rm <path>`) only after explicit
@@ -223,6 +228,7 @@ Never fabricate issue numbers. If you cannot resolve a reference, call
 /login. Файл — `src/auth/callback.ts`.
 
 **Assistant:**
+
 1. `list_projects` → matches current repo to project `api`.
 2. `create_task_draft` with `type: "bug"`, `title: "Fix login redirect loop
    after OAuth"`, `context: "<user quote + inferred details>"`,
@@ -234,6 +240,7 @@ Never fabricate issue numbers. If you cannot resolve a reference, call
 **User:** ок, публикуй
 
 **Assistant:**
+
 1. `publish_issue` with the draft path.
 2. Reports: `Issue #42 created — https://github.com/acme/api/issues/42`.
 
@@ -242,6 +249,7 @@ Never fabricate issue numbers. If you cannot resolve a reference, call
 **User:** close #38, it was shipped in v2.3.0
 
 **Assistant:**
+
 1. `add_comment` on issue `38` with body
    `Shipped in v2.3.0 — closing.`.
 2. `update_issue` on issue `38` with `state: "closed"`.
@@ -252,6 +260,7 @@ Never fabricate issue numbers. If you cannot resolve a reference, call
 **User:** закрой задачу про падающие тесты
 
 **Assistant:**
+
 1. `list_issues` with `state: "open"` and lists candidates containing
    "test" / "падают" / "flaky".
 2. Asks the user to pick a number — does NOT guess.
@@ -262,6 +271,7 @@ Never fabricate issue numbers. If you cannot resolve a reference, call
 17.4, в Chrome и Firefox всё ок."
 
 **Assistant:**
+
 1. `add_comment` on `17` with the exact text.
 2. Reports the comment URL.
 
