@@ -54,7 +54,7 @@ When performing a task, the AI agent **must follow this sequence**:
 | # | File | Purpose |
 |---|------|---------|
 | 1 | `_meta/how-to-write-rules.md` | Understand formatting, structure, and standards |
-| 2 | `process/architecture-design.md` | Perform pre-implementation design. Document diagrams, affected layers, boundaries |
+| 2 | `process/architecture-design.md` | Pre-implementation design. Document diagrams and layers |
 | 3 | `process/ai-workflow.md` | Review lifecycle rules: understand, design, implement, verify, document |
 | 4 | `database/schema.md` | Read database schema before touching migrations, tables, or relations |
 | 5 | `domain/{domain-name}.md` | Read all relevant domains to understand business rules, state machines, invariants |
