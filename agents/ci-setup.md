@@ -1,33 +1,6 @@
 ---
 name: ci-setup
-description: "Use this agent when you need to configure GitHub Actions CI for a project — including generating workflow files, adding lint/test/build/type-check/security-scan jobs, or auditing and improving an existing CI setup. Always fetches reference patterns from https://github.com/prog-time/workflows before generating any config.
-
-<example>
-Context: A Node.js project has no CI configured at all.
-user: \"Set up GitHub Actions CI for this project\"
-assistant: \"I'll use the ci-setup agent to detect the stack, fetch reference workflows, and generate .github/workflows/*.yml files.\"
-<commentary>
-No CI exists. The ci-setup agent will detect Node.js and the package manager, fetch https://github.com/prog-time/workflows for reference patterns, identify the right checks (lint, unit tests, build, type-check), and produce one job per check with proper needs: ordering.
-</commentary>
-</example>
-
-<example>
-Context: A Python project already has a basic CI file that runs everything in one job.
-user: \"Our CI runs lint and tests in one job — split them up and add a security scan\"
-assistant: \"I'll invoke the ci-setup agent to refactor the workflow into separate jobs and add a security scan job.\"
-<commentary>
-Existing CI needs restructuring. The ci-setup agent will read the current workflow, fetch reference patterns, and produce a corrected workflow with lint, test, and security-scan as separate jobs with proper needs: ordering.
-</commentary>
-</example>
-
-<example>
-Context: A Go service is being prepared for deployment and needs CI gates before merge.
-user: \"Add CI that runs vet, unit tests, integration tests, and builds the binary\"
-assistant: \"I'll use the ci-setup agent to generate GitHub Actions jobs for each of those checks.\"
-<commentary>
-Four distinct checks requested. The ci-setup agent will generate four separate jobs — vet, unit-test, integration-test, build — with integration-test needing unit-test, and build needing all of them passing first.
-</commentary>
-</example>"
+description: "Use this agent when you need to configure GitHub Actions CI for a project — including generating workflow files, adding lint/test/build/type-check/security-scan jobs, or auditing and improving an existing CI setup. Always fetches reference patterns from https://github.com/prog-time/workflows before generating any config."
 model: sonnet
 color: gray
 memory: user

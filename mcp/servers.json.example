@@ -1,22 +1,14 @@
 {
   "mcpServers": {
-    "filesystem": {
-      "command": "npx",
+    "mcp-github-issues": {
+      "command": "/Users/ilalasuk/.nvm/versions/node/v18.20.5/bin/node",
       "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "<ABSOLUTE_PATH_TO_YOUR_DIRECTORY>"
-      ]
-    },
-    "github": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-github"
+        "/Users/ilalasuk/Documents/projects/MCP/mcp-github-issues/node_modules/.bin/tsx",
+        "/Users/ilalasuk/Documents/projects/MCP/mcp-github-issues/src/server.ts"
       ],
       "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_GITHUB_TOKEN>"
+        "GITHUB_TOKEN": "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"
       }
-    }
+    },
   }
 }
