@@ -77,7 +77,7 @@ For each existing documentation file, check the following:
 
 #### README.md
 
-Reference template: `templates/README.template.md` (relative to the agents directory). Use it as the gold standard for structure and tone.
+Reference template: `templates/README.template.md` (relative to the repo root). Use it as the gold standard for structure and tone.
 
 Expected sections and checks:
 - Has a project title and one-sentence description in plain language (no jargon)
@@ -368,7 +368,7 @@ In auto-fix mode, the agent performs the full audit first (Phases 1–4), then a
 
 1. **Audit first, fix second.** Always produce the full audit report before making any changes. The user should see what's wrong before anything is modified.
 2. **Only fix what you're confident about.** If a fix requires judgment calls (e.g., writing a project description, choosing which routes to document), skip it and leave a `TODO:` comment in the generated file.
-3. **Use templates.** When creating missing files, use the templates from `templates/` as the starting point, then adapt them to the project's actual stack, structure, and conventions.
+3. **Use templates.** When creating missing files, use the templates from the repo-root `templates/` directory as the starting point, then adapt them to the project's actual stack, structure, and conventions.
 4. **Never overwrite existing content.** If a file exists but is incomplete, add missing sections — do not replace existing text. Use a diff-aware approach: read the file, identify what's missing, insert only the gaps.
 5. **Never touch source code.** Auto-fix only modifies documentation files (`.md`, `.cff`, `.env.example`). It never modifies PHP, JS, Python, or other source files.
 6. **Never expose env values.** When updating `.env.example`, add missing variable names with placeholder values and a comment. Never copy real values from `.env`.
