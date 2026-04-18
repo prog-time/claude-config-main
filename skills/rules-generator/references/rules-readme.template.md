@@ -7,8 +7,10 @@ with real values substituted.
 ```markdown
 # Rules Directory — Master Orchestrator
 
-> **Purpose:** Serve as the single entry point for AI agents to understand all mandatory rules, dependencies, and execution order.
-> **Context:** Read this file first. Follow the steps exactly before touching any code, schema, or documentation.
+> **Purpose:** Serve as the single entry point for AI agents to understand all mandatory rules,
+> dependencies, and execution order.
+> **Context:** Read this file first.
+> Follow the steps exactly before touching any code, schema, or documentation.
 > **Version:** 1.0
 
 ## 1. Core Principle
@@ -20,7 +22,8 @@ Before any task:
 3. Follow rules strictly in order
 4. Produce complete and auditable output
 
-> The agent **must never skip reading any required file**. All domain, process, and meta rules are part of the source of truth.
+> The agent **must never skip reading any required file**.
+> All domain, process, and meta rules are part of the source of truth.
 
 ## 2. Directory Overview
 
@@ -50,7 +53,7 @@ When performing a task, the AI agent **must follow this sequence**:
 
 | # | File | Purpose |
 |---|------|---------|
-| 1 | `_meta/how-to-write-rules.md` | Understand formatting, structure, and standards for all rules files |
+| 1 | `_meta/how-to-write-rules.md` | Understand formatting, structure, and standards |
 | 2 | `process/architecture-design.md` | Perform pre-implementation design. Document diagrams, affected layers, boundaries |
 | 3 | `process/ai-workflow.md` | Review lifecycle rules: understand, design, implement, verify, document |
 | 4 | `database/schema.md` | Read database schema before touching migrations, tables, or relations |

@@ -183,7 +183,8 @@ If any item is missing → design is incomplete.
 ```markdown
 # Observability Rules
 
-> Purpose: Guarantee that every feature is observable in production. Prevent "black box" systems that cannot be debugged after deployment.
+> Purpose: Guarantee that every feature is observable in production.
+> Prevent "black box" systems that cannot be debugged after deployment.
 > Context: Read this file before implementing any endpoint, background job, integration, or infrastructure change.
 > Version: 1.0
 
@@ -470,7 +471,8 @@ Every change must update rules. Failure to update documentation means the task i
 ```markdown
 # CI/CD Rules
 
-> Purpose: Ensure every change passes automated checks and deployments consistently. Guarantee that AI-generated code is validated and deployable before reaching production.
+> Purpose: Ensure every change passes automated checks and deployments consistently.
+> Guarantee that AI-generated code is validated and deployable before reaching production.
 > Context: Read this file before touching any CI/CD pipeline, merge request, or deployment process.
 > Version: 1.0
 
@@ -577,8 +579,10 @@ jobs:
 ```markdown
 # Security Rules
 
-> Purpose: Ensure every change is secure by default. Prevent common classes of vulnerabilities frequently introduced by AI-generated code.
-> Context: Read this file before implementing any feature that touches authentication, input handling, database queries, external APIs, or configuration.
+> Purpose: Ensure every change is secure by default.
+> Prevent common classes of vulnerabilities frequently introduced by AI-generated code.
+> Context: Read this file before implementing any feature that touches authentication,
+> input handling, database queries, external APIs, or configuration.
 > Version: 1.0
 
 ## 1. Core principle
