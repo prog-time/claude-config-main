@@ -13,7 +13,7 @@ execute, deliver, abort, sync.
 | [`_shared/error-templates.md`](_shared/error-templates.md) | Canonical STOP messages, keyed by identifier. |
 | [`_shared/report-templates.md`](_shared/report-templates.md) | Canonical final-report layouts per command. |
 
-## Commands
+## Command reference
 
 | Command | Role | Input | Output |
 |---|---|---|---|
