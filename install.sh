@@ -35,7 +35,7 @@ run() {
   if [[ $DRY_RUN -eq 1 ]]; then
     log "DRY: $*"
   else
-    eval "$@"
+    "$@"
   fi
 }
 
