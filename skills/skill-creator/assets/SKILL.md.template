@@ -1,0 +1,45 @@
+---
+name: <skill-name>
+description: |
+  <One sentence on what the skill does.>
+  Use ALWAYS when the user says "<trigger 1>", "<trigger 2>", "<trigger 3>"
+  or <describe the behavioral signal>.
+  Do NOT use for <explicit exclusion 1> or <explicit exclusion 2>.
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+---
+
+# <Skill Title>
+
+<One-paragraph purpose statement.>
+
+## Workflow
+
+### Step 1 — <action>
+
+<Concrete, atomic instruction.>
+
+### Step 2 — <action>
+
+<Concrete, atomic instruction.>
+
+## Rules
+
+- <Do this.>
+- <Do NOT do that.>
+
+## Examples
+
+### Example 1 — <scenario>
+
+**User:** <realistic phrasing>
+
+**Assistant:** <expected behavior>
+
+## Edge Cases
+
+- **<Edge case 1>** — <how to handle>.
+- **<Edge case 2>** — <how to handle>.

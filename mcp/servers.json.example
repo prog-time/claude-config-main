@@ -1,21 +1,13 @@
 {
   "mcpServers": {
-    "filesystem": {
-      "command": "npx",
+    "mcp-github-issues": {
+      "command": "<NODE_BIN_PATH>",
       "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "<ABSOLUTE_PATH_TO_YOUR_DIRECTORY>"
-      ]
-    },
-    "github": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-github"
+        "<MCP_GITHUB_ISSUES_PATH>/node_modules/.bin/tsx",
+        "<MCP_GITHUB_ISSUES_PATH>/src/server.ts"
       ],
       "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_GITHUB_TOKEN>"
+        "GITHUB_TOKEN": "<GITHUB_TOKEN>"
       }
     }
   }

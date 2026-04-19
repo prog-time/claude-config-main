@@ -51,10 +51,10 @@ values (paths, tokens, emails). No errors means it is ready to commit.
 There is no generator for agents. Create the file manually:
 
 ```bash
-cp agents/example.md agents/my-agent.md
+$EDITOR agents/my-agent.md
 ```
 
-Edit `agents/my-agent.md`. Required frontmatter fields:
+Required frontmatter fields:
 
 ```yaml
 ---
@@ -67,7 +67,28 @@ model: sonnet
 ```
 
 The full specification is in [`docs/conventions.md`](docs/conventions.md).
-Use [`agents/example.md`](agents/example.md) as a reference.
+
+### Agent with private resources (optional)
+
+Claude Code only discovers agents from `.md` files at the **top level** of
+`agents/` — subdirectories are never scanned. When an agent needs private
+resources (stack profiles, prompt snippets, reference material loaded on
+demand), use the **"agent + subdirectory of the same name"** pattern:
+
+```text
+agents/my-agent.md           # the agent definition (discovered by Claude)
+agents/my-agent/             # private resources, loaded by the agent itself via Read
+  profile-a.md
+  profile-b.md
+```
+
+The `.md` file must stay at the top level; the sibling directory holds
+everything else. Example: `agents/backend-agent.md` +
+`agents/backend-agent/{php,python}.md`.
+
+Shared export assets that an agent copies into *other* projects
+(README/CHANGELOG/PR templates) do not belong under `agents/` — they live
+in the repo-root [`templates/`](templates/) directory.
 
 ---
 
