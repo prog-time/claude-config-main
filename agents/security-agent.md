@@ -58,7 +58,7 @@ Perform all checks in sequence:
 
 #### 1. Secrets Scan
 Search the entire codebase for:
-- API keys and tokens (patterns: `sk-`, `pk-`, `AKIA`, `ghp_`, `xox[bpas]-`, `Bearer `)
+- API keys and tokens (patterns: `sk-`, `pk-`, `AKIA`, `ghp_`, `xox[bpas]-`, `Bearer`)
 - Passwords and connection strings (patterns: `password=`, `secret=`, `DATABASE_URL=`, `mongodb://`, `postgres://`)
 - Private keys (`-----BEGIN.*PRIVATE KEY-----`)
 - AWS credentials, Firebase config, Stripe keys, etc.
