@@ -556,17 +556,17 @@ The entire API must be described in one file.
 **Location:** `rules/api/openapi.yaml`
 
 ✅ Correct
-```
+\`\`\`
 rules/api/openapi.yaml
-```
+\`\`\`
 
 ❌ Incorrect
-```
+\`\`\`
 rules/api/endpoints/*.yaml
 rules/api/endpoints.md
 docs/api.md
 swagger-per-route/
-```
+\`\`\`
 
 ## 3. Format rules (mandatory)
 
@@ -578,10 +578,10 @@ swagger-per-route/
 - Must import into Postman
 - Must support client generation
 
-```yaml
+\`\`\`yaml
 # ✅ Correct
 openapi: 3.0.3
-```
+\`\`\`
 
 ❌ Incorrect: Free-text Markdown, hand-written tables, partial specs
 
@@ -607,7 +607,7 @@ Nothing may be implicit.
 
 ## 5. Path definition rules
 
-```yaml
+\`\`\`yaml
 # ✅ Correct
 paths:
   /users/{id}:
@@ -616,18 +616,18 @@ paths:
       description: Returns a single user resource
       operationId: getUserById
       tags: [Users]
-```
+\`\`\`
 
-```yaml
+\`\`\`yaml
 # ❌ Incorrect
 paths:
   /users/{id}:
     get: {}
-```
+\`\`\`
 
 ## 6. Schema rules
 
-```yaml
+\`\`\`yaml
 # ✅ Correct
 components:
   schemas:
@@ -639,59 +639,59 @@ components:
           type: integer
         email:
           type: string
-```
+\`\`\`
 
-```yaml
+\`\`\`yaml
 # ❌ Incorrect
 schema:
   type: object
-```
+\`\`\`
 
 ## 7. Response rules
 
-```yaml
+\`\`\`yaml
 # ✅ Correct
 responses:
   "200":
     description: Success
   "404":
     description: Not found
-```
+\`\`\`
 
-```yaml
+\`\`\`yaml
 # ❌ Incorrect
 responses:
   "200": {}
-```
+\`\`\`
 
 ## 8. Business rule linkage
 
-```yaml
+\`\`\`yaml
 x-business-rules:
   - BR-001
   - BR-004
-```
+\`\`\`
 
 ## 9. Side effects rules
 
-```yaml
+\`\`\`yaml
 x-side-effects:
   - dispatch UserRegistered
   - enqueue SendWelcomeEmail
   - call Stripe API
-```
+\`\`\`
 
 Hidden side effects are forbidden.
 
 ## 10. Security rules
 
-```yaml
+\`\`\`yaml
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
-```
+\`\`\`
 
 ## 11. Validation rules (mandatory)
 
@@ -942,7 +942,8 @@ When writing this file, produce EXACTLY this content:
 ```markdown
 # Observability Rules
 
-> Purpose: Guarantee that every feature is observable in production. Prevent "black box" systems that cannot be debugged after deployment.
+> Purpose: Guarantee that every feature is observable in production. Prevent "black box" systems that cannot be debugged
+> after deployment.
 > Context: Read this file before implementing any endpoint, background job, integration, or infrastructure change.
 > Version: 1.0
 
@@ -1233,7 +1234,8 @@ When writing this file, produce EXACTLY this content:
 ```markdown
 # CI/CD Rules
 
-> Purpose: Ensure every change passes automated checks and deployments consistently. Guarantee that AI-generated code is validated and deployable before reaching production.
+> Purpose: Ensure every change passes automated checks and deployments consistently. Guarantee that AI-generated code is
+> validated and deployable before reaching production.
 > Context: Read this file before touching any CI/CD pipeline, merge request, or deployment process.
 > Version: 1.0
 
@@ -1342,8 +1344,10 @@ When writing this file, produce EXACTLY this content:
 ```markdown
 # Security Rules
 
-> Purpose: Ensure every change is secure by default. Prevent common classes of vulnerabilities frequently introduced by AI-generated code.
-> Context: Read this file before implementing any feature that touches authentication, input handling, database queries, external APIs, or configuration.
+> Purpose: Ensure every change is secure by default. Prevent common classes of vulnerabilities frequently introduced by
+> AI-generated code.
+> Context: Read this file before implementing any feature that touches authentication, input handling, database queries,
+> external APIs, or configuration.
 > Version: 1.0
 
 ## 1. Core principle
@@ -1615,19 +1619,24 @@ After all files are written, output this JSON report (fill in real values from P
 }
 ```
 
-`deviations` lists any file marked as not applicable and the reason. `summary` is a one-paragraph plain-text summary of what was found and produced.
+`deviations` lists any file marked as not applicable and the reason. `summary` is a one-paragraph plain-text summary of
+what was found and produced.
 
 ## Rules (non-negotiable)
 
 1. **Phase 0 first** — never create or write any file before the full codebase analysis is complete.
 2. **No invented content** — every rule, table, column, and domain must be derived from real evidence in the codebase.
-3. **No skipped files** — all mandatory files must be created; use `_Not applicable — [reason]_` to mark inapplicable content but still create the file.
+3. **No skipped files** — all mandatory files must be created; use `_Not applicable — [reason]_` to mark inapplicable
+   content but still create the file.
 4. **No mixed concerns** — never combine unrelated domains in one file.
 5. **Exact naming** — file and directory names must match the canonical structure exactly: lowercase, hyphenated.
-6. **One domain per file** — create one `domain/{domain-name}.md` for each identified business domain; do not collapse multiple domains into one file.
-7. **Mermaid diagrams required** — include an `erDiagram` in `database/schema.md` and a `stateDiagram-v2` in each domain file that has a status/state field.
+6. **One domain per file** — create one `domain/{domain-name}.md` for each identified business domain; do not collapse
+   multiple domains into one file.
+7. **Mermaid diagrams required** — include an `erDiagram` in `database/schema.md` and a `stateDiagram-v2` in each domain
+   file that has a status/state field.
 8. **Business rules numbered** — all business rules in domain files must follow the `BR-NNN` format.
-9. **Task file completion convention** — when a specified task from a tasks file is completed, rename the task file by prepending `done_` to the beginning of the filename (e.g., `task-foo.md` → `done_task-foo.md`).
+9. **Task file completion convention** — when a specified task from a tasks file is completed, rename the task file by
+   prepending `done_` to the beginning of the filename (e.g., `task-foo.md` → `done_task-foo.md`).
 
 ## Self-Verification Before Writing Any File
 
@@ -1640,7 +1649,9 @@ After all files are written, output this JSON report (fill in real values from P
 
 ## Self-Verification Before Submitting Output
 
-- [ ] All mandatory files exist: README.md, _meta/how-to-write-rules.md, database/schema.md, api/endpoints.md, process/architecture-design.md, process/observability.md, process/ai-workflow.md, process/ci-cd.md, process/security.md, process/testing-strategy.md
+- [ ] All mandatory files exist: README.md, _meta/how-to-write-rules.md, database/schema.md, api/endpoints.md,
+  process/architecture-design.md, process/observability.md, process/ai-workflow.md, process/ci-cd.md,
+  process/security.md, process/testing-strategy.md
 - [ ] At least one domain file exists under `domain/`
 - [ ] ERD in `database/schema.md` includes all tables from migrations
 - [ ] All business rules in domain files follow the BR-NNN numbering format
@@ -1650,15 +1661,18 @@ After all files are written, output this JSON report (fill in real values from P
 
 ## Persistent Agent Memory
 
-You have a persistent memory directory at `/Users/ilalasuk/.claude/agent-memory/rules-generator/`. Its contents persist across conversations.
+You have a persistent memory directory at `/Users/ilalasuk/.claude/agent-memory/rules-generator/`. Its contents persist
+across conversations.
 
 Use it to track:
+
 - Projects analyzed and their detected stack (framework, language, ORM, database)
 - Domain structures found per project (domain names, table counts, rule counts)
 - Patterns that commonly appear in specific stacks (e.g. Laravel, NestJS, Django)
 - Deviations that were common and their resolutions
 
 Guidelines:
+
 - `MEMORY.md` is always loaded into your system prompt — keep it concise (under 200 lines)
 - Create separate topic files for detailed notes and link from `MEMORY.md`
 - Update or remove entries that turn out to be wrong or outdated
@@ -1667,15 +1681,20 @@ Guidelines:
 ## Searching past context
 
 When looking for past context:
+
 1. Search topic files in your memory directory:
-```
-Grep with pattern="<search term>" path="/Users/ilalasuk/.claude/agent-memory/rules-generator/" glob="*.md"
-```
-2. Session transcript logs (last resort — large files, slow):
-```
-Grep with pattern="<search term>" path="/Users/ilalasuk/.claude/projects/" glob="*.jsonl"
-```
+
+   ```text
+   Grep with pattern="<search term>" path="/Users/ilalasuk/.claude/agent-memory/rules-generator/" glob="*.md"
+   ```
+
+1. Session transcript logs (last resort — large files, slow):
+
+   ```text
+   Grep with pattern="<search term>" path="/Users/ilalasuk/.claude/projects/" glob="*.jsonl"
+   ```
 
 ## MEMORY.md
 
-Your MEMORY.md is currently empty. Start by saving the first project's stack and domain structure after your first analysis so future sessions can build on it.
+Your MEMORY.md is currently empty. Start by saving the first project's stack and domain structure after your first analysis
+so future sessions can build on it.
