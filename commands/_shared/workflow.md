@@ -7,17 +7,23 @@ than restating the whole flow.
 ## Canonical flow (happy path)
 
 ```
-┌───────────────┐     ┌──────────────┐     ┌────────────────┐
-│ /task_create  │ ──▶ │ /task_branch │ ──▶ │ /task_complete │
-│ (spec + issue)│     │ (issues-{N}) │     │ (team-lead +   │
-│               │     │              │     │  /task_submit) │
-└───────────────┘     └──────────────┘     └────────┬───────┘
-                                                    │
-                                                    ▼
-                                          ┌─────────────────┐
-                                          │   PR on GitHub  │
-                                          └─────────────────┘
+┌───────────────┐     ┌────────────────────────────────────────┐
+│ /task_create  │ ──▶ │ /task_complete                         │
+│ (spec + issue)│     │  ├─ auto-invokes /task_branch          │
+│               │     │  │   (issues-{N} prepared here)        │
+│               │     │  ├─ team-lead pipeline                 │
+│               │     │  └─ /task_submit (commits → PR)        │
+└───────────────┘     └────────────────────┬───────────────────┘
+                                           │
+                                           ▼
+                                 ┌─────────────────┐
+                                 │   PR on GitHub  │
+                                 └─────────────────┘
 ```
+
+`/task_branch` can also be invoked manually (standalone) at any
+time — it remains a self-contained command. When invoked from inside
+`/task_complete`, it is called automatically in Step 2.5.
 
 Delivery-only shortcut (work done manually on the branch):
 
@@ -54,7 +60,7 @@ Periodic reconciliation (cron or manual):
 |---|---|---|---|---|---|
 | `/task_create` | task description | project registry | `tasks/*.md`, GitHub Issue | `task-writer` agent, MCP | No (creates every time) |
 | `/task_branch` | URL or task-file path | task file, git state | git branch | — | Yes (re-enters existing branch) |
-| `/task_complete` | URL or task-file path | task file, git state, MCP | nothing directly (delegates) | `team-lead`, `/task_submit` | Yes (team-lead + submit both idempotent) |
+| `/task_complete` | URL or task-file path | task file, git state, MCP | nothing directly (delegates) | `/task_branch`, `team-lead`, `/task_submit` | Yes (branch re-enter + team-lead + submit all idempotent) |
 | `/task_submit` | (branch-derived) | git state, MCP, task file | commits, remote branch, PR | `git-agent` skill, MCP | Yes (reuses existing PR) |
 | `/task_abort` | (branch-derived) | git state, MCP, `github-tasks.json` | deletes branch, comments Issue, updates JSON | MCP | Yes |
 | `/task_sync` | — | GitHub, `github-tasks.json`, `tasks/` | `github-tasks.json`, new `tasks/*.md`, Issue comments | MCP | Yes |
@@ -86,16 +92,18 @@ else is allowed (see `_contract.md` §8):
 |---|---|
 | `/task_create` | MCP connected; `tasks/` exists or can be created |
 | `/task_branch` | Clean working tree; `main` branch exists; input resolves to an Issue number |
-| `/task_complete` | Currently on `issues-{N}` (the same `{N}` as the input resolves to); MCP connected if input is a URL |
+| `/task_complete` | MCP connected if input is a URL; clean working tree and synced `main` are verified by `/task_branch` (Step 2.5) |
 | `/task_submit` | Currently on `issues-{N}`; MCP connected |
 | `/task_abort` | Currently on `issues-{N}` OR Issue number passed explicitly |
 | `/task_sync` | MCP connected |
 
 ## Non-goals (explicitly out of scope)
 
-- **Automatic branch switching** — only `/task_branch` and
-  `/task_abort` touch branches. `/task_complete` and `/task_submit`
-  refuse to operate on the wrong branch; they do not "fix" it.
+- **Inline branch switching** — `/task_complete` delegates all
+  branch preparation to `/task_branch` (Step 2.5); it never switches
+  branches itself. `/task_submit` refuses to operate on the wrong
+  branch and does not "fix" it. Only `/task_branch` and `/task_abort`
+  directly manipulate the branch state.
 - **Force-push recovery.** Never. Any push rejection is a STOP.
 - **`gh` CLI fallback.** Never. If MCP is unavailable, STOP.
 - **Reopening / closing GitHub Issues.** `/task_sync` comments only.

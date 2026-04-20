@@ -10,12 +10,14 @@ contract: _contract.md
 > invoke, capture, and verbatim semantics. These definitions
 > override any loose natural-language reading inside the steps.
 
-Executes a task on an already-prepared `issues-{N}` branch:
-resolves the task spec, hands it to the `team-lead` agent, then
-delegates delivery (commits → push → PR) to `/task_submit`.
+Single entry point for task execution: prepares the `issues-{N}` branch
+(by invoking `/task_branch`), resolves the task spec, hands it to the
+`team-lead` agent, then delegates delivery (commits → push → PR) to
+`/task_submit`.
 
-Branch preparation lives in `/task_branch`. Delivery mechanics live
-in `/task_submit`. This command is the middle orchestrator.
+Branch preparation is in scope through the `/task_branch` invocation in
+Step 2.5. Delivery mechanics live in `/task_submit`. This command is the
+single orchestrator for the full pipeline.
 
 **Input:** `$ARGUMENTS` — either
 - a local path like `tasks/TASK-YYYYMMDD-{slug}.md`, or
@@ -38,6 +40,26 @@ in `/task_submit`. This command is the middle orchestrator.
 - `$ARGUMENTS` is empty → STOP with
   `error-templates.md#usage-missing-args` (`command=task_complete`,
   `argument_hint=<tasks/TASK-*.md path | GitHub issue URL>`).
+
+### Step 2.5 — Invoke `/task_branch`
+
+**Preconditions:** `task_source` captured (Step 1 complete).
+**Action:** invoke `/task_branch` per `_contract.md` §2, passing
+`task_source` verbatim as `$ARGUMENTS`. `/task_branch` classifies
+the input, resolves `issue_number`, verifies the working tree,
+syncs `main`, and creates or re-enters `issues-{N}`. The current
+branch is `issues-{N}` when `/task_branch` completes.
+
+**Capture:** `branch_state` (`new` | `existing`) from the
+`Branch:` field of `/task_branch`'s report.
+
+**Failure modes:**
+- `/task_branch` STOPs for any reason → STOP, surfacing its output
+  verbatim. No inline fallback, per `_contract.md` §2.
+
+**Invariants after:** current branch is exactly
+`issues-{issue_number_from_branch}`; contains every commit on
+`main`.
 
 ### Step 2a — Resolve spec from GitHub URL
 
@@ -86,7 +108,8 @@ verbatim file contents).
 
 ### Step 3 — Verify the current branch
 
-**Preconditions:** `issue_number` captured.
+**Preconditions:** `issue_number` captured (Step 2a or 2b);
+`branch_state` captured (Step 2.5).
 **Action:** `git rev-parse --abbrev-ref HEAD`. Compare against
 `issues-{issue_number}`.
 **Capture:** none (implicit assertion).
@@ -96,11 +119,14 @@ verbatim file contents).
   `error-templates.md#branch-mismatch`
   (`current=<branch>`, `expected=issues-{issue_number}`,
   `next_command=task_branch`, `argument_hint={task_source}`).
+  (This gate is theoretically unreachable when Step 2.5 succeeded,
+  but is kept for self-containment per `_contract.md` §6.)
 - Not a git repo → STOP with
   `error-templates.md#not-a-git-repo`.
 
 **Invariants after:** current branch matches the Issue the task
-refers to. This command never switches branches.
+refers to. Branch switching is performed by `/task_branch` in
+Step 2.5; this command performs no inline branch switching.
 
 ### Step 4 — Hand the task off to `team-lead`
 
@@ -177,7 +203,7 @@ at it.
 ```
 Task source:   {task_source}
 GitHub Issue:  #{issue_number}
-Branch:        issues-{issue_number}
+Branch:        issues-{issue_number}   [{branch_state}]
 Pull Request:  {pr_url} — [{pr_tag}]
 ----
 {team_lead_report}
@@ -189,7 +215,7 @@ Pull Request:  {pr_url} — [{pr_tag}]
 ```
 Task source:   {task_source}
 GitHub Issue:  #{issue_number}
-Branch:        issues-{issue_number}
+Branch:        issues-{issue_number}   [{branch_state}]
 Delivery:      skipped — team-lead outcome `{team_lead_outcome}`
 ----
 {team_lead_report}
@@ -200,9 +226,11 @@ Delivery:      skipped — team-lead outcome `{team_lead_outcome}`
 
 ## Rules (non-negotiable)
 
-- Branch preparation is out of scope. This command never switches,
-  pulls, or creates branches. If Step 3 fails, defer to
-  `/task_branch`.
+- Branch preparation is in scope through the `/task_branch`
+  invocation in Step 2.5. This command never switches, pulls, or
+  creates branches inline — all branch operations are delegated to
+  `/task_branch`. The `branch-mismatch` gate in Step 3 is a
+  defensive invariant, not a recovery path.
 - Delivery is out of scope for the inline body. Commits, push, and
   PR always go through `/task_submit`. No parallel fallback.
 - `task_spec` is passed to `team-lead` verbatim. No summarisation,
