@@ -18,6 +18,10 @@ branch.
 Does **not** run the task pipeline — that belongs to
 `/task_complete`. See `_shared/workflow.md` for the full chain.
 
+This command may be invoked standalone by the user, or automatically
+from `/task_complete` Step 2.5. Both paths are supported; the
+behaviour is identical in either context.
+
 **Input:** `$ARGUMENTS` — either
 - a local path like `tasks/TASK-YYYYMMDD-{slug}.md`, or
 - a GitHub issue URL like `https://github.com/{owner}/{repo}/issues/{N}`.
@@ -163,7 +167,11 @@ Next:          /task_complete {task_source}
 The `Next:` line always points at `/task_complete` — the
 `/task_submit` alternative is documented in
 `_shared/workflow.md` and is the user's call, not this command's
-suggestion.
+suggestion. When this command is invoked automatically from inside
+`/task_complete` Step 2.5, the `Next:` line is tautological but is
+still emitted per `_contract.md` §7 ("Reports are the last thing the
+command emits"); the parent captures only `branch_state` and ignores
+the `Next:` field.
 **Capture:** none.
 **Failure modes:** none — this step is terminal.
 
