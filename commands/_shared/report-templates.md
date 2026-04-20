@@ -48,7 +48,7 @@ Header (always emitted):
 ```
 Task source:   {GitHub URL | local file path}
 GitHub Issue:  #{N}
-Branch:        issues-{N}
+Branch:        issues-{N}   [new | existing]
 Pull Request:  {pr_url} — [new | existing]
 ----
 <team-lead Project Execution Report, verbatim>
@@ -60,7 +60,7 @@ skipped):
 ```
 Task source:   {GitHub URL | local file path}
 GitHub Issue:  #{N}
-Branch:        issues-{N}
+Branch:        issues-{N}   [new | existing]
 Delivery:      skipped — team-lead outcome `{outcome}`
 ----
 <team-lead Project Execution Report, verbatim>
