@@ -105,6 +105,24 @@ Replace `Input` / `Status` with the fields that make sense for
 your derived command. Keep labels left-aligned and padded to
 15 characters.
 
+## `mcp_prog_time_writer`
+
+Fields (all required). `Env keys` renders `—` (em dash) when the
+checkout has no `.env.example`:
+
+```
+Checkout:      {checkout_path}
+Config file:   {config_path}   [new | existing]
+Launch:        {node_bin} {tsx_path} {entry_path}
+Env keys:      {comma-separated KEY names | —}
+Next:          reconnect MCP (/mcp, or restart Claude Code) to launch prog-time-writer
+```
+
+The `[new | existing]` tag reports whether the `prog-time-writer`
+key already existed in the config (the rest of the file is left
+untouched either way). Any `Env keys` are written as `<KEY>`
+placeholders that the user must replace before the server connects.
+
 ## `task_sync`
 
 Multi-section report (the only free-form template). The sections

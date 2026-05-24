@@ -261,3 +261,55 @@ Placeholders: `{N}`, `{command}`.
 Issue #{N} is closed on GitHub. /{command} will not operate on
 closed issues. Reopen the issue or pick a different one.
 ```
+
+## `mcp-path-not-found`
+
+Placeholders: `{path}`.
+
+```
+The path `{path}` does not exist or is not a directory. Pass the
+absolute path to your local prog-time-writer checkout and retry.
+```
+
+## `node-not-found`
+
+Placeholders: `{command}`.
+
+```
+`node` was not found on PATH. Install Node.js (or activate the
+right version manager), then retry /{command}.
+```
+
+## `mcp-tsx-not-found`
+
+Placeholders: `{tsx_path}`, `{checkout_path}`.
+
+```
+`tsx` is not present at `{tsx_path}`. Install dependencies in the
+checkout first:
+
+  (cd {checkout_path} && npm install)
+
+then retry.
+```
+
+## `mcp-entry-not-found`
+
+Placeholders: `{entry_path}`.
+
+```
+The server entry point `{entry_path}` does not exist. This command
+expects the prog-time-writer checkout to expose `src/server.ts`
+(the mcp-github-issues convention). Verify the checkout and retry.
+```
+
+## `mcp-config-write-failed`
+
+Placeholders: `{path}`, `{error}`.
+
+```
+Could not write the MCP config at `{path}`.
+
+error:
+{error}
+```
