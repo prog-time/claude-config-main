@@ -24,6 +24,18 @@ execute, deliver, abort, sync.
 | [`/task_abort`](task_abort.md) | Abandon a branch, comment the Issue | reason string | branch deleted, Issue commented |
 | [`/task_sync`](task_sync.md) | Reconcile GitHub ↔ `github-tasks.json` ↔ `tasks/` | — | updated JSON + new task files |
 
+## Utility commands
+
+Contract-compliant commands outside the task lifecycle:
+
+| Command | Role | Input | Output |
+|---|---|---|---|
+| [`/mcp_prog_time_writer`](mcp_prog_time_writer.md) | Register the `prog-time-writer` MCP server (local stdio via `node` + `tsx`) | absolute path to the checkout | `prog-time-writer` entry merged into `.mcp.json` |
+
+The harness launches MCP servers, so this command validates the
+checkout, writes the launch entry into `.mcp.json`, and leaves the
+actual start to the next MCP reconnect.
+
 ## Happy path
 
 ```
