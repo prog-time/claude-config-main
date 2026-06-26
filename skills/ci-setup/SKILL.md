@@ -127,8 +127,16 @@ If `.github/workflows/` already has files:
 
 ### Step 6 — Verify before reporting
 
-- Every generated YAML is syntactically valid (check indentation
-  carefully).
+Lint the generated files — do not rely on eyeballing YAML:
+
+```bash
+make lint-yaml          # yamllint over the repo (.yamllint.yml config)
+command -v actionlint >/dev/null 2>&1 && actionlint   # Actions semantics, if installed
+```
+
+Fix every reported error before continuing. Then confirm by inspection:
+
+- yamllint (and actionlint, if available) pass cleanly.
 - Every check has exactly one job.
 - Every job needing ordering has a `needs:`.
 - No secrets or tokens are hardcoded.
@@ -151,6 +159,9 @@ If `.github/workflows/` already has files:
   `${{ secrets.NAME }}`.
 - **Match prog-time/workflows naming and structure** wherever the
   reference repo provides a relevant example.
+- **Lint before reporting.** Run `make lint-yaml` (and `actionlint`
+  if available) on the generated files. Never report success on
+  unlinted YAML.
 
 ## Output Format
 
