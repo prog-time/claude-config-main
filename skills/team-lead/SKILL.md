@@ -17,8 +17,6 @@ description: |
   Do NOT invoke agent-builder from here.
 allowed-tools:
   - Read
-  - Write
-  - Edit
   - Bash
   - Grep
   - Glob
@@ -68,6 +66,9 @@ Check whether `.claude/logs/log_agents.log` exists in the project root.
 Generate the `workflow_id` once and reuse it for every entry this run. Generate
 each `ts` (ISO 8601 UTC, e.g. `2026-06-26T15:30:01Z`) at the moment you write
 the line. Always **append** — never rewrite or delete existing lines.
+
+All log writes go through `Bash` (append with `>>`). This skill has no `Write`
+or `Edit` tool — it routes work, it does not author files.
 
 Opening event:
 
