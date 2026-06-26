@@ -12,8 +12,8 @@ description: |
   turned into a readable article. Walks through task clarification,
   outline, drafting, editing, and saving to `.md`. Do NOT use for:
   internal project docs (README, CHANGELOG — use `docs-quality`),
-  generating `rules/` (use `rules-generator`), PR descriptions or
-  release notes (use `git-agent`), or inline code comments.
+  generating `rules/` (use `rules-generator`), PR descriptions (use
+  `git-pr`) or release notes (use `git-release`), or inline code comments.
 allowed-tools:
   - Read
   - Write

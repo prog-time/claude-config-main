@@ -16,7 +16,7 @@ tutorial", etc.) and produces a `.md` file as output.
 
 - Internal project docs (README, CHANGELOG — use `docs-quality`)
 - Generating `rules/` (use `rules-generator`)
-- PR descriptions or release notes (use `git-agent`)
+- PR descriptions (use `git-pr`) or release notes (use `git-release`)
 - Inline code comments
 
 ## Structure
