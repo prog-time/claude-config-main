@@ -92,7 +92,7 @@ Claude Code:
 |---------|---------|
 | `/task_create` | Create a task file in `tasks/` and a linked GitHub Issue via `mcp-github-issues`. |
 | `/task_sync` | Sync GitHub Issues with local `github-tasks.json` — create missing local tasks, comment on done ones. |
-| `/task_complete` | Prepare the working tree and branch for a task, then hand the task off to the `team-lead` agent. |
+| `/task_complete` | Prepare the working tree and branch for a task, then hand the task off to the `team-lead` skill. |
 
 ## CI
 
