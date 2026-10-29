@@ -111,13 +111,14 @@ Log:
 | `devops` | `devops-agent` |
 | `deps` | `dependency-manager` |
 | `docs` | `docs-quality` |
+| generate `rules/` / AI knowledge base | `rules-writer` |
 | architecture / code review / decomposition | `tech-lead` |
-| requirements / acceptance criteria | `task-writer` |
+| requirements / acceptance criteria | `spec-writer` |
 | anything else | `general-purpose` |
 
 ### Ordering rules (for complex pipelines)
 
-1. **Design before implementation** — `task-writer` / `api-designer` /
+1. **Design before implementation** — `spec-writer` / `api-designer` /
    `tech-lead` run BEFORE `backend-agent` / `frontend-agent` / `db-agent`.
 2. **Schema before app code** — `db-agent` runs BEFORE `backend-agent` when the
    task touches the database.
