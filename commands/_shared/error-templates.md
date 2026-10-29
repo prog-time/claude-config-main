@@ -15,21 +15,21 @@ No other wrapping, no preamble, no "Here is the error:" prefix.
 
 ---
 
-## `mcp-not-connected`
+## `gh-not-available`
 
 Placeholders: `{command}`.
 
 ```
-mcp-github-issues is not connected. Register it in .mcp.json or
-~/.claude/settings.json and retry /{command}.
+GitHub CLI (`gh`) is not available or not authenticated. Install it
+and run `gh auth login`, then retry /{command}.
 ```
 
-## `mcp-call-failed`
+## `tool-call-failed`
 
 Placeholders: `{tool}`, `{error}`.
 
 ```
-MCP call `{tool}` failed. The command cannot continue.
+`{tool}` failed. The command cannot continue.
 
 error:
 {error}
@@ -44,28 +44,50 @@ Current directory is not inside a git repository. Run /task_* from
 a checked-out repo.
 ```
 
-## `projects-yaml-empty`
+## `origin-not-github`
+
+Placeholders: `{origin_url}`.
+
+```
+The `origin` remote is `{origin_url}`, not a GitHub repository.
+The project repository is always `origin`: add or fix it with
+`git remote add origin <github url>` / `git remote set-url origin
+<github url>` and retry.
+```
+
+## `issue-repo-mismatch`
+
+Placeholders: `{url}`, `{repo_slug}`.
+
+```
+Issue `{url}` belongs to a different repository than `origin`
+(`{repo_slug}`). Open the Issue in `{repo_slug}`, or run the command
+from that repository's checkout.
+```
+
+## `develop-missing`
 
 No placeholders.
 
 ```
-mcp-github-issues returned an empty project list. Add this repo to
-projects.yaml (or the MCP's project registry) and retry.
+`origin/develop` does not exist. Every Pull Request targets
+`develop`, so create it first (e.g. `git switch -c develop
+origin/main && git push -u origin develop`) and retry.
 ```
 
-## `project-not-found`
+## `issue-format-invalid`
 
-Placeholders: `{repo_basename}`, `{projects_list}` (newline-separated
-`- {key} — {owner}/{repo}` lines).
+Placeholders: `{path}`, `{missing}` (newline-separated `- {section}`
+lines).
 
 ```
-No project in the mcp-github-issues registry matches this repo
-(`{repo_basename}`). Available projects:
+Task file `{path}` is missing required sections, so the GitHub Issue
+would not match the canonical format. Missing:
 
-{projects_list}
+{missing}
 
-Re-run with a project key explicitly, or add this repo to the
-registry and retry.
+Fix the task file (or re-run /task_create so spec-writer regenerates
+it) and retry.
 ```
 
 ## `usage-missing-args`
@@ -120,23 +142,23 @@ git status:
 {status_output}
 ```
 
-## `main-switch-failed`
+## `develop-switch-failed`
 
 Placeholders: `{error}`.
 
 ```
-Failed to switch to `main`.
+Failed to switch to `develop`.
 
 error:
 {error}
 ```
 
-## `main-pull-failed`
+## `develop-pull-failed`
 
 Placeholders: `{error}`.
 
 ```
-`git pull origin main` did not complete cleanly. Resolve the
+`git pull origin develop` did not complete cleanly. Resolve the
 conflict or rejected update manually, then retry.
 
 error:
@@ -159,7 +181,7 @@ error:
 Placeholders: `{branch}`, `{error}`.
 
 ```
-`git merge main` into `{branch}` produced a conflict. Resolve
+`git merge develop` into `{branch}` produced a conflict. Resolve
 manually (or `git merge --abort` to bail) and retry.
 
 error:
@@ -201,7 +223,7 @@ with origin.
 Placeholders: `{error}`.
 
 ```
-`git-agent` could not produce a commit. Fix the underlying issue
+`git-commit` could not produce a commit. Fix the underlying issue
 (lint, hook, signing) and retry — do not bypass with --no-verify.
 
 error:
@@ -225,7 +247,7 @@ error:
 Placeholders: `{error}`.
 
 ```
-Opening the Pull Request via mcp-github-issues failed.
+Opening the Pull Request via `gh pr create` failed.
 
 error:
 {error}
@@ -236,8 +258,8 @@ error:
 Placeholders: `{outcome}` (either `blocked` or `partial`).
 
 ```
-team-lead pipeline ended with outcome `{outcome}`. Delivery
-(commits, push, PR) is skipped. Inspect the pipeline report below
+team-lead skill ended with outcome `{outcome}`. Delivery
+(commits, push, PR) is skipped. Inspect the team-lead result below
 and decide how to proceed manually.
 ```
 
@@ -262,54 +284,86 @@ Issue #{N} is closed on GitHub. /{command} will not operate on
 closed issues. Reopen the issue or pick a different one.
 ```
 
-## `mcp-path-not-found`
-
-Placeholders: `{path}`.
-
-```
-The path `{path}` does not exist or is not a directory. Pass the
-absolute path to your local prog-time-writer checkout and retry.
-```
-
-## `node-not-found`
+## `prog-time-not-connected`
 
 Placeholders: `{command}`.
 
 ```
-`node` was not found on PATH. Install Node.js (or activate the
-right version manager), then retry /{command}.
+prog-time-writer MCP is not connected. Register it in .mcp.json (or
+your ~/.claude settings) and reconnect, then retry /{command}.
 ```
 
-## `mcp-tsx-not-found`
+## `topic-not-allowed`
 
-Placeholders: `{tsx_path}`, `{checkout_path}`.
-
-```
-`tsx` is not present at `{tsx_path}`. Install dependencies in the
-checkout first:
-
-  (cd {checkout_path} && npm install)
-
-then retry.
-```
-
-## `mcp-entry-not-found`
-
-Placeholders: `{entry_path}`.
+Placeholders: `{topic}`, `{allowed}`.
 
 ```
-The server entry point `{entry_path}` does not exist. This command
-expects the prog-time-writer checkout to expose `src/server.ts`
-(the mcp-github-issues convention). Verify the checkout and retry.
+`{topic}` is not a supported topic. Pass one of: {allowed}
+(or no argument to auto-pick), then retry.
 ```
 
-## `mcp-config-write-failed`
+## `no-sites`
 
-Placeholders: `{path}`, `{error}`.
+No placeholders.
 
 ```
-Could not write the MCP config at `{path}`.
+prog-time-writer returned an empty site list. Configure at least one
+WordPress site on the MCP server and retry.
+```
+
+## `snipp-unreachable`
+
+Placeholders: `{error}`.
+
+```
+Could not source an idea from snipp.ru. The command needs at least
+one usable idea in the allowed topics before it writes anything.
 
 error:
 {error}
+```
+
+## `all-candidates-duplicate`
+
+Placeholders: `{collisions}` (newline-separated
+`- {candidate title} → {existing post title} ({url})` lines).
+
+```
+Every candidate idea already has a near-duplicate on prog-time.
+Nothing was written or published. Collisions:
+
+{collisions}
+
+Re-run later, or pass a different topic, to seed fresh ideas.
+```
+
+## `category-not-found`
+
+Placeholders: `{topic}`, `{site}`.
+
+```
+No category on `{site}` matches the topic `{topic}`. Create the
+category on the WordPress site (or pick a different topic) and retry.
+```
+
+## `article-generation-failed`
+
+Placeholders: `{error}`.
+
+```
+The blog-article-writer skill did not produce a readable article
+file. Nothing was published.
+
+error:
+{error}
+```
+
+## `unexpected-post-status`
+
+Placeholders: `{status}`.
+
+```
+publish_post returned status `{status}`, expected `draft`. The post
+was not in the expected state; this command will not edit, delete,
+or re-publish it. Inspect the post on prog-time and resolve manually.
 ```

@@ -13,8 +13,8 @@ omissions except where the template marks a field optional.
 - **Tag order is `[new | existing]`**, never the reverse.
 - **Em dash `—`** separates URL from tag: `Pull Request: <url> — [new]`.
 - **`----` (four hyphens on their own line)** separates the
-  compact header from any embedded sub-report (e.g. team-lead's
-  Project Execution Report).
+  compact header from any embedded sub-report (e.g. the team-lead
+  skill's JSON result).
 - **No trailing prose.** After the report, emit nothing.
 - Missing-but-expected fields are rendered as `—` (em dash), not
   `N/A` or blank. Truly optional fields are omitted entirely.
@@ -51,10 +51,10 @@ GitHub Issue:  #{N}
 Branch:        issues-{N}   [new | existing]
 Pull Request:  {pr_url} — [new | existing]
 ----
-<team-lead Project Execution Report, verbatim>
+<team-lead skill JSON result, verbatim>
 ```
 
-**Blocked variant** (pipeline ended `blocked` / `partial`, delivery
+**Blocked variant** (team-lead outcome `blocked` / `partial`, delivery
 skipped):
 
 ```
@@ -63,7 +63,7 @@ GitHub Issue:  #{N}
 Branch:        issues-{N}   [new | existing]
 Delivery:      skipped — team-lead outcome `{outcome}`
 ----
-<team-lead Project Execution Report, verbatim>
+<team-lead skill JSON result, verbatim>
 ```
 
 ## `task_submit`
@@ -105,23 +105,25 @@ Replace `Input` / `Status` with the fields that make sense for
 your derived command. Keep labels left-aligned and padded to
 15 characters.
 
-## `mcp_prog_time_writer`
+## `prog_time_writer`
 
-Fields (all required). `Env keys` renders `—` (em dash) when the
-checkout has no `.env.example`:
+Fields (all required):
 
 ```
-Checkout:      {checkout_path}
-Config file:   {config_path}   [new | existing]
-Launch:        {node_bin} {tsx_path} {entry_path}
-Env keys:      {comma-separated KEY names | —}
-Next:          reconnect MCP (/mcp, or restart Claude Code) to launch prog-time-writer
+Topic:         {chosen_topic}
+Source idea:   {snipp_source_url}
+Article file:  {article_path}
+Title:         {article_title}
+Category:      {category_name} — #{category_id}
+Dup check:     {count} compared — no near-match
+Post:          {post_url} — [new]
+Status:        draft
 ```
 
-The `[new | existing]` tag reports whether the `prog-time-writer`
-key already existed in the config (the rest of the file is left
-untouched either way). Any `Env keys` are written as `<KEY>`
-placeholders that the user must replace before the server connects.
+`Post` always carries the `[new]` tag — the command only ever
+creates a fresh draft, never reuses one. `Status` is always `draft`;
+this command never publishes publicly. `Source idea` is the snipp.ru
+URL that seeded the article.
 
 ## `task_sync`
 
@@ -152,5 +154,5 @@ Notes:
     carries no size metadata).
 
 Errors:
-  #{N} — {MCP or filesystem error}
+  #{N} — {gh or filesystem error}
 ```
