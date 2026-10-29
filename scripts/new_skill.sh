@@ -20,11 +20,35 @@ fi
 
 mkdir -p "$DIR"
 
-cat > "$DIR/SKILL.md" <<EOF
+# Single source of truth for the SKILL.md shape: the skill-creator asset
+# template. Rendering from it (rather than an inline heredoc) keeps the
+# scaffold and the canonical template from drifting apart.
+TEMPLATE="$REPO/skills/skill-creator/assets/SKILL.md.template"
+
+if [[ -f "$TEMPLATE" ]]; then
+  NAME="$NAME" DESC="$DESC" python3 - "$TEMPLATE" > "$DIR/SKILL.md" <<'PY'
+import os, sys
+t = open(sys.argv[1]).read()
+t = t.replace('name: <skill-name>', 'name: ' + os.environ['NAME'])
+t = t.replace('<One sentence on what the skill does.>', os.environ['DESC'])
+t = t.replace('# <Skill Title>', '# ' + os.environ['NAME'])
+sys.stdout.write(t)
+PY
+else
+  # Fallback — keep the good frontmatter shape (literal description + allowed-tools)
+  # even if the template asset is missing.
+  cat > "$DIR/SKILL.md" <<EOF
 ---
 name: $NAME
-description: >
+description: |
   $DESC
+  Use ALWAYS when the user says "<trigger 1>", "<trigger 2>", "<trigger 3>".
+  Do NOT use for <explicit exclusion>.
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
 ---
 
 # $NAME
@@ -32,14 +56,13 @@ description: >
 TODO: describe what the skill does, when it triggers, and what output it
 produces.
 
-## When it triggers
+## Workflow
 
-- TODO
-
-## What to do
+### Step 1 — <action>
 
 1. TODO
 EOF
+fi
 
 cat > "$DIR/README.md" <<EOF
 # $NAME
