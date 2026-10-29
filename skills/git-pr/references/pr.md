@@ -10,7 +10,7 @@ Load this file when handling:
 Collect these inputs (ask the user if not provided):
 
 - **Source branch** — default: current branch (`git branch --show-current`)
-- **Target branch** — default: `main`, then `master`
+- **Target branch** — default: `develop` (Mode F accepts only `develop`)
 - **Related issues/tickets** — optional
 
 Fetch commits:
@@ -127,7 +127,7 @@ _The task was generated using the MCP server — [prog-time/mcp-github-issues](h
 the generated content first.
 
 ```bash
-gh pr create --title "{title}" --body "{generated_description}" --base {target_branch}
+gh pr create -R {origin_repo} --title "{title}" --body "{generated_description}" --base develop
 ```
 
 ## Self-Verification Before Reporting
