@@ -9,7 +9,7 @@ execute, deliver, abort, sync.
 |---|---|
 | [`_contract.md`](_contract.md) | Canonical semantics of STOP, invoke, capture, verbatim. Every command references it. |
 | [`_shared/workflow.md`](_shared/workflow.md) | How the commands chain together. Diagrams and per-command contract matrix. |
-| [`_shared/project-resolution.md`](_shared/project-resolution.md) | MCP `project` lookup algorithm (shared by every command that touches GitHub). |
+| [`_shared/repo-resolution.md`](_shared/repo-resolution.md) | `gh`-based `owner/repo` resolution + gh preflight (shared by every command that touches GitHub). |
 | [`_shared/error-templates.md`](_shared/error-templates.md) | Canonical STOP messages, keyed by identifier. |
 | [`_shared/report-templates.md`](_shared/report-templates.md) | Canonical final-report layouts per command. |
 
@@ -19,7 +19,7 @@ execute, deliver, abort, sync.
 |---|---|---|---|
 | [`/task_create`](task_create.md) | Create task file + GitHub Issue | task description | `tasks/TASK-*.md` + Issue |
 | [`/task_branch`](task_branch.md) | Prepare `issues-{N}` branch | task path or Issue URL | branch checked out |
-| [`/task_complete`](task_complete.md) | Execute task end-to-end (team-lead + delivery) | task path or Issue URL | PR on GitHub |
+| [`/task_complete`](task_complete.md) | Execute task end-to-end (team-lead skill + delivery) | task path or Issue URL | PR on GitHub |
 | [`/task_submit`](task_submit.md) | Delivery-only: commits → push → PR | (branch-derived) | PR on GitHub |
 | [`/task_abort`](task_abort.md) | Abandon a branch, comment the Issue | reason string | branch deleted, Issue commented |
 | [`/task_sync`](task_sync.md) | Reconcile GitHub ↔ `github-tasks.json` ↔ `tasks/` | — | updated JSON + new task files |
@@ -30,20 +30,23 @@ Contract-compliant commands outside the task lifecycle:
 
 | Command | Role | Input | Output |
 |---|---|---|---|
-| [`/mcp_prog_time_writer`](mcp_prog_time_writer.md) | Register the `prog-time-writer` MCP server (local stdio via `node` + `tsx`) | absolute path to the checkout | `prog-time-writer` entry merged into `.mcp.json` |
+| [`/prog_time_writer`](prog_time_writer.md) | Generate a prog-time article (essay, senior-dev voice) seeded from snipp.ru and publish it as a WordPress draft | optional topic (`PHP`/`Laravel`/`Docker`/`Python`/`JavaScript`) | `.md` artifact + draft post on prog-time |
 
-The harness launches MCP servers, so this command validates the
-checkout, writes the launch entry into `.mcp.json`, and leaves the
-actual start to the next MCP reconnect.
+`/prog_time_writer` requires the `prog-time-writer` MCP server to be
+registered (in `.mcp.json` or your `~/.claude` settings) and
+connected. It sources an idea from snipp.ru, checks prog-time for
+near-duplicates, writes the article via the `blog-article-writer`
+skill, and publishes it as a draft — all WordPress access goes
+through the MCP.
 
 ## Happy path
 
 ```
 /task_create "<intent>"       # writes tasks/TASK-*.md + opens Issue #N
-/task_branch tasks/TASK-*.md  # switches to issues-N, synced from main
+/task_branch tasks/TASK-*.md  # switches to issues-N, synced from develop
 /task_complete tasks/TASK-*.md
-    ├── team-lead pipeline runs
-    └── /task_submit         # commits via git-agent, pushes, opens PR
+    ├── team-lead skill routes to one agent
+    └── /task_submit         # commits via git-commit, pushes, opens PR
 ```
 
 Result: PR open on GitHub with `Closes #N`.
@@ -78,11 +81,12 @@ not needed:
 - Switch branches silently. Only `/task_branch` and `/task_abort`
   touch branches.
 - Force-push or force-delete remote branches. Never.
-- Fall back to `gh` CLI when MCP is unavailable. If MCP is down,
-  the command STOPs and waits.
+- Use a project-key registry. GitHub access goes through the `gh`
+  CLI against the `origin` repository; if `gh` is missing or
+  unauthenticated, the command STOPs and waits.
 - Reopen / close GitHub Issues automatically.
 - Rewrite `github-tasks.json` silently when it is malformed.
-- Fabricate Issue numbers, project keys, or PR URLs.
+- Fabricate Issue numbers or PR URLs.
 
 See `_contract.md` §5 for the full forbidden list.
 
@@ -103,8 +107,8 @@ A new command is contract-compliant when it:
    Invariants after`).
 4. References `_shared/error-templates.md` for every STOP message
    (add new keys there rather than inlining text).
-5. References `_shared/project-resolution.md` for any MCP project
-   lookup rather than inlining the algorithm.
+5. References `_shared/repo-resolution.md` for GitHub repo
+   resolution rather than inlining the algorithm.
 6. Ends with a Report step using a template from
    `_shared/report-templates.md` (add a new section there if the
    command's shape is genuinely new).
