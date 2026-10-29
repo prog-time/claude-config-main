@@ -8,9 +8,11 @@ description: |
   "configure GitHub Actions", "add a CI pipeline", "generate workflow
   files", "audit the CI setup", "improve the workflow", "настрой CI",
   "добавь GitHub Actions", "сделай workflow", "настрой пайплайн",
-  "проверь CI конфигурацию". Walks through stack detection, reference
-  fetching, job graph planning, workflow generation, and optional audit
-  of existing files. Do NOT use for: Docker or deployment scripts (use
+  "проверь CI конфигурацию", "настрой деплой", "настрой выкатку",
+  "set up deployment workflow". Walks through stack detection, reference
+  fetching, job graph planning, workflow generation (CI + the canonical
+  test/production deploy workflow), and optional audit of existing
+  files. Do NOT use for: Docker or the deploy scripts themselves (use
   the `devops-agent`), running tests (use `qa-engineer`), or authoring
   GitHub Actions secrets/vars outside workflow files.
 allowed-tools:
@@ -105,14 +107,36 @@ Apply the job graph and reference patterns to produce
   declare it explicitly.
 - **Runner** — follow the prog-time/workflows convention; default
   `ubuntu-latest`.
-- **Triggers** — at minimum `on: [push, pull_request]`. Match the
-  reference repo where applicable.
+- **Name and triggers** — the CI workflow is `name: CI` and runs on
+  `push` to `main` and `develop` plus `pull_request` into `develop`
+  (see `references/delivery.md`). Match the reference repo for
+  anything beyond that.
 - **Caching** — include dependency caching (`actions/cache` or built-in
   language caching).
 - **Step naming** — every step has a `name:` field.
 - **Secrets** — never hardcode tokens or keys; use
   `${{ secrets.NAME }}`.
 - **File naming** — follow the reference repo's convention.
+
+### Step 4b — Generate the deploy workflow
+
+**Read `references/delivery.md` first.** Every project uses the same
+delivery model: `test` deploys automatically when CI is green on
+`main`; `production` deploys on a `v*` tag or via *Run workflow*,
+behind the `production` environment's Required reviewers.
+
+1. Copy `templates/deploy.yml` (this skill — installed at
+   `~/.claude/skills/ci-setup/templates/deploy.yml`) to
+   `.github/workflows/deploy.yml`.
+2. Replace `__DEPLOY_COMMAND__` with the project's real deploy command
+   and add the secrets / setup steps it needs. If the project has no
+   deploy command, do not write `deploy.yml`: report it and suggest
+   `devops-agent` to create one.
+3. Leave triggers, `if:` conditions, the `verify-release` job,
+   `concurrency` and environment names as they are.
+
+Skip this step only when the project does not deploy (library, CLI
+published elsewhere) — say so in the report.
 
 ### Step 5 — Audit existing workflows (if present)
 
@@ -124,6 +148,11 @@ If `.github/workflows/` already has files:
 4. Identify missing jobs for checks the project supports — add them.
 5. Preserve custom env vars, secrets, matrix builds, or manual triggers
    unless they conflict with the new structure.
+6. Check every deploy against the invariants in
+   `references/delivery.md`: deploys from `develop` or feature
+   branches, deploy jobs inside CI, production without a tag/manual
+   trigger or without `environment: production` — move them into
+   `deploy.yml` per the canonical template.
 
 ### Step 6 — Verify before reporting
 
@@ -162,6 +191,13 @@ Fix every reported error before continuing. Then confirm by inspection:
 - **Lint before reporting.** Run `make lint-yaml` (and `actionlint`
   if available) on the generated files. Never report success on
   unlinted YAML.
+- **One delivery model.** `test` ← green CI on `main`; `production` ←
+  `v*` tag or *Run workflow*, `environment: production`. Never deploy
+  from `develop`, from feature branches, or from inside the CI
+  workflow.
+- **Never trigger a deploy yourself.** Do not push `v*` tags, run
+  `gh workflow run` on the deploy workflow, or push to `main` while
+  setting this up.
 
 ## Output Format
 
@@ -185,6 +221,12 @@ Produce a completion report:
 ### Files Written
 
 - .github/workflows/ci.yml — [brief description]
+- .github/workflows/deploy.yml — test on green CI@main, production on v* / Run workflow
+
+### Manual steps
+
+- [Environments `test` / `production`, Required reviewers on production,
+  environment secrets — from `references/delivery.md`]
 
 ### Notes
 [Assumptions made, checks not added and why, follow-up needed.]
