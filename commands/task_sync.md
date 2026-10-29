@@ -41,42 +41,55 @@ No arguments.
 - Not a git repo → STOP with
   `error-templates.md#not-a-git-repo`.
 
-### Step 2 — Verify MCP connectivity
+### Step 2 — Verify `gh` is available
 
 **Preconditions:** `state` loaded.
-**Action:** confirm the `mcp__mcp-github-issues__*` namespace.
+**Action:** confirm the GitHub CLI is installed and authenticated:
+
+```bash
+gh auth status
+```
+
+**Capture:** none.
 
 **Failure modes:**
-- Unavailable → STOP with
-  `error-templates.md#mcp-not-connected`
-  (`command=task_sync`).
+- Command fails (missing or unauthenticated) → STOP with
+  `error-templates.md#gh-not-available` (`command=task_sync`).
 
-### Step 3 — Resolve MCP project
+### Step 3 — Resolve the repo
 
-**Preconditions:** MCP connected (Step 2).
-**Action:** apply `_shared/project-resolution.md`.
-**Capture:** `project` (string key).
-**Failure modes:** as defined in `_shared/project-resolution.md`.
+**Preconditions:** `gh` available (Step 2).
+**Action:** apply `_shared/repo-resolution.md` to obtain the target
+repository.
+**Capture:** `repo_slug` (`owner/repo`).
+**Failure modes:** as defined in `_shared/repo-resolution.md`
+(`command=task_sync`).
 
 ### Step 4 — Fetch open issues
 
-**Preconditions:** `project` resolved.
-**Action:** call `mcp__mcp-github-issues__list_issues` with
-`project` and filter `is:open`.
-**Capture:** `open_issues` (array; may be empty).
+**Preconditions:** `repo_slug` resolved.
+**Action:** list open issues with their canonical fields:
+
+```bash
+gh issue list -R {repo_slug} --state open --limit 1000 --json number,title,url,labels
+```
+
+**Capture:** `open_issues` (array of objects with `number`, `title`,
+`url`, `labels`; may be empty).
 
 **Failure modes:**
-- MCP call fails → STOP with
-  `error-templates.md#mcp-call-failed`
-  (`tool=list_issues`, `error=<verbatim>`).
+- `gh issue list` fails → STOP with
+  `error-templates.md#tool-call-failed`
+  (`tool=gh issue list`, `error=<verbatim>`).
 - Empty list → **do not STOP.** Skip Step 5 and continue at
   Step 6 (existing JSON records still need processing).
 
 ### Step 5 — Add missing issues to `state`
 
 **Preconditions:** `open_issues` non-empty.
-**Action:** for each issue, build
-`url = https://github.com/{owner}/{repo}/issues/{N}`. Then:
+**Action:** for each issue, take `url` from the `.url` field
+returned by `gh issue list` (canonical
+`https://github.com/{repo_slug}/issues/{N}`). Then:
 
 - If `url` is already a key in `state` → **skip; never modify the
   existing record** (no status update, no `local` overwrite, no
@@ -109,9 +122,10 @@ skips; no individual insertion can fail independently.
      was done", using the task's description sections
      (`## Что делаем`, `## Готово когда`, `## Как делаем`).
      Free-form prose, no bullets, no headers.
-   - Call `mcp__mcp-github-issues__add_comment`.
+   - Post it: `gh issue comment {N} -R {repo_slug} --body-file {scratch_file}`
+     (write the paragraph to a scratch file to keep prose intact).
    - Success → set `close: true` on the record, save `state`.
-   - Failure → append to `errors`: `#{N} — <MCP error>`. Do **not**
+   - Failure → append to `errors`: `#{N} — <gh error>`. Do **not**
      set `close: true` so the next run retries.
 
 **Capture:** `comments_posted`, `comments_skipped` (count),
@@ -119,8 +133,8 @@ skips; no individual insertion can fail independently.
 
 This step **never closes the GitHub issue**. It only comments.
 
-**Failure modes:** per-record `add_comment` failures are collected
-into `errors[]` (not STOP). The step as a whole cannot fail — it
+**Failure modes:** per-record `gh issue comment` failures are
+collected into `errors[]` (not STOP). The step as a whole cannot fail — it
 either posts or records an error and moves on.
 
 ### Step 7 — Find open records missing local files
@@ -143,11 +157,18 @@ either posts or records an error and moves on.
 **Action:** for each record marked:
 
 1. Extract `{N}` from the URL key (`/issues/(\d+)$`).
-2. Determine filename — **deterministic, no slug:**
+2. Look for an existing task file for this Issue, in order:
+   - a file matching `tasks/TASK-*-github-{N}.md` (any date prefix);
+   - any `tasks/*.md` whose header links the Issue
+     (`grep -lE '^\*\*GitHub Issue:\*\* #{N}( |$)' tasks/*.md`) —
+     e.g. a file written by `/task_create`.
+
+   Found → capture its path as `local_path`, reuse it as-is, and
+   jump to Step 9. Never create a second file for the same Issue.
+3. Not found → `local_path` is **deterministic, no slug:**
    `tasks/TASK-{YYYYMMDD-today}-github-{N}.md`.
-3. If a file matching `tasks/TASK-*-github-{N}.md` already exists
-   (any date prefix) → reuse it as-is; jump to Step 9.
-4. Fetch issue via `mcp__mcp-github-issues__fetch_issue`.
+4. Fetch the issue:
+   `gh issue view {N} -R {repo_slug} --json title,body,labels`.
 5. Map `Type` from labels (first match wins):
 
    | Label         | `Type`     |
@@ -157,7 +178,7 @@ either posts or records an error and moves on.
    | `task`        | `refactor` |
    | *(none)*      | `feature`  |
 
-6. Write the file:
+6. Write the file to `local_path`:
 
    ```markdown
    # TASK-{YYYYMMDD-today}-github-{N}: {issue title verbatim}
@@ -175,11 +196,12 @@ either posts or records an error and moves on.
    - `Size` is hardcoded `M` (GitHub Issues carry no size).
    - Issue body is verbatim — no sectioning, no trimming.
 
-**Capture:** `files_created`, `files_already_present` (counts).
+**Capture:** `local_path` per record; `files_created`,
+`files_already_present` (counts).
 
 **Failure modes:**
-- `fetch_issue` fails → append to `errors[]`:
-  `#{N} — fetch_issue: <verbatim>`. Skip this record; do not STOP
+- `gh issue view` fails → append to `errors[]`:
+  `#{N} — gh issue view: <verbatim>`. Skip this record; do not STOP
   the whole command.
 - Filesystem write fails → append to `errors[]`:
   `#{N} — write failed: <verbatim>`. Skip.
@@ -188,8 +210,9 @@ either posts or records an error and moves on.
 
 **Preconditions:** Step 8 finished.
 **Action:** for each record from Step 8 (created or reused),
-set `local = "tasks/TASK-{YYYYMMDD-today}-github-{N}.md"`. Save
-`state`.
+set `local` to that record's `local_path` from Step 8 — the
+reused file's real path, not a path rebuilt from today's date.
+Save `state`.
 
 This step **is** allowed to edit existing records (the Step-5
 prohibition is scoped to Step 5 only).
@@ -243,11 +266,12 @@ Errors:
 - Never fabricate comment text. Missing `local` → skip with log.
 - Never overwrite existing local task files. Reuse by
   `TASK-*-github-{N}.md` glob.
-- Never use `gh` CLI. MCP-only.
+- GitHub access is `gh` CLI only, against the `origin`
+  repository. No project registry.
 - Filename slug comes from issue number, not title.
 - JSON uses double quotes. Real JSON, not JSON5.
 - `close: true` is the commented-flag. Set only after a successful
-  `add_comment`; skipped forever unless manually reset.
+  `gh issue comment`; skipped forever unless manually reset.
 
 ## Edge cases
 
@@ -266,6 +290,6 @@ Errors:
 - **MCP rate limit in Step 6** — log the error verbatim, leave
   `close` unset, continue to the next record. No sleeping, no
   retry.
-- **Repo has no `origin` remote** — project resolution falls back
-  to matching by folder name (see
-  `_shared/project-resolution.md`).
+- **Repo has no GitHub `origin` remote** — Step 3 STOPs with
+  `origin-not-github` (see `_shared/repo-resolution.md`). The project
+  repository is always `origin`; other remotes are ignored.
