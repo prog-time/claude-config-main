@@ -79,26 +79,20 @@ Before writing output:
 
 ## PR Description Template
 
-The template matches `templates/github/PULL_REQUEST_TEMPLATE.md` — the file a
-human sees when opening a PR manually. Generated and manual PRs look the same.
+Same sections as `templates/github/PULL_REQUEST_TEMPLATE.md` (the file a human
+sees when opening a PR manually), minus its `## Checklist`: nothing reads it on a
+generated PR, so it is never emitted.
 
 ```markdown
 ## Summary
 
 [1–2 sentences: what changed and why. Consolidate all commits into one short
-paragraph. No bullet list.]
+paragraph. No bullet list. State any breaking change here.]
 
 ## Linked issues
 
 Closes #{N}
 [Add "Related to #{M}" on its own line for linked-but-not-closed issues.]
-
-## Checklist
-
-- [ ] Tests pass locally
-- [ ] Docs / CHANGELOG updated if behavior changed
-- [ ] No leftover debug code, prints, or stale TODOs
-- [ ] Breaking changes flagged in the summary
 
 ## Notes for reviewer
 
@@ -116,8 +110,6 @@ _The task was generated using the MCP server — [prog-time/mcp-github-issues](h
 - **`Closes #{N}`** — extract `{N}` from the current branch
   (`^issues-(\d+)$`). If the branch does not match, leave `Closes #` and warn
   the user that the issue number must be filled manually.
-- **Checklist** — always emit empty checkboxes. The skill cannot know whether
-  tests ran or docs are updated; the human author ticks them before merge.
 - **MCP footer** — always append the footer verbatim. It's a static marker
   identifying this repo's task-origin workflow.
 
@@ -138,6 +130,6 @@ gh pr create -R {origin_repo} --title "{title}" --body "{generated_description}"
 - [ ] Summary is 1–2 sentences, not a per-commit ledger
 - [ ] `Closes #{N}` was auto-filled from the current branch name (or a warning
       was raised)
-- [ ] Checklist is present with all boxes empty — for the human to tick
+- [ ] No `## Checklist` section in the PR body
 - [ ] MCP footer is appended verbatim
 - [ ] No publishing action was taken without explicit user confirmation

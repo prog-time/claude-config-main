@@ -5,7 +5,7 @@ publishes the PR via the `gh` CLI.
 
 - **C — PR description** (`git-agent desc pr [branch] -> [target]`): classifies
   and consolidates commits, fills the PR template (Summary, Linked issues,
-  Checklist, Notes), auto-fills `Closes #{N}` from the branch.
+  Notes), auto-fills `Closes #{N}` from the branch.
 - **F — Publish PR** (`git-agent publish pr [branch] -> [target]`): same, then
   runs `gh pr create` after explicit confirmation.
 
@@ -26,7 +26,7 @@ publishes the PR via the `gh` CLI.
 
 - Never invents commits — classification is from real `git log` only.
 - Never publishes without explicit confirmation.
-- MCP footer appended verbatim; checklist emitted with empty boxes.
+- MCP footer appended verbatim; no checklist in the PR body.
 
 ## Installation
 
