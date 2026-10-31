@@ -316,6 +316,7 @@ Before returning the final rewrite, scan it for `—` and `–`. Any hit means t
 >
 > When users hit a slow page, they leave.
 **After:**
+<!-- markdownlint-disable-next-line MD024 -->
 > ## Performance
 >
 > When users hit a slow page, they leave.
