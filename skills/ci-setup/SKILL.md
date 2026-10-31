@@ -138,6 +138,18 @@ behind the `production` environment's Required reviewers.
 Skip this step only when the project does not deploy (library, CLI
 published elsewhere) — say so in the report.
 
+### Step 4c — Add the git flow workflows
+
+If the project has an `origin/develop` branch, copy both templates to
+`.github/workflows/` unchanged:
+
+- `templates/git-process.yml` checks branch names, PR targets, and the
+  `issues-{N}|` commit prefix on every PR.
+- `templates/sync-develop.yml` merges `main` into `develop` on every push
+  to `main`.
+
+Without `origin/develop`, skip this step and say so in the report.
+
 ### Step 5 — Audit existing workflows (if present)
 
 If `.github/workflows/` already has files:
