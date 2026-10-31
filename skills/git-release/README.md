@@ -8,7 +8,8 @@ publishes a GitHub Release via the `gh` CLI.
 - **E — Release Notes + CHANGELOG** (`git-agent desc changelog {version}`): same,
   then prepends the entry to `CHANGELOG.md` (shows the diff first).
 - **G — Publish Release** (`git-agent publish release {version}`): same as D,
-  then runs `gh release create` after explicit confirmation.
+  plus an audit of all open Issues; after explicit confirmation runs
+  `gh release create` and closes the Issues the audit found completed.
 
 ## Triggers
 
@@ -22,7 +23,7 @@ publishes a GitHub Release via the `gh` CLI.
 
 - Creating commits (use `git-commit`)
 - PR descriptions (use `git-pr`)
-- git pull / push / rebase / merge, or managing GitHub issues
+- git pull / push / rebase / merge, or managing GitHub issues outside a release
 
 ## Key guarantees
 
@@ -31,6 +32,8 @@ publishes a GitHub Release via the `gh` CLI.
   user confirms.
 - CHANGELOG prepended (never overwritten); diff shown before writing.
 - Never publishes without explicit confirmation.
+- Closes an Issue only with evidence shown in the confirmation, and only after
+  the release succeeds.
 
 ## Installation
 
