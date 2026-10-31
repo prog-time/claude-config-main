@@ -1,0 +1,50 @@
+# Checks a Pull Request against the shared git flow: branch name, target branch,
+# and the issues-{N}| prefix on its commits.
+name: git-process
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  branch-and-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check branch name and commit prefixes
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$HEAD_REF" == "develop" && "$BASE_REF" == "main" ]]; then
+            echo "Release PR develop -> main: nothing to check."
+            exit 0
+          fi
+
+          if [[ ! "$HEAD_REF" =~ ^issues-[0-9]+$ ]]; then
+            echo "::error::Branch '$HEAD_REF' must be named issues-{N}."
+            exit 1
+          fi
+
+          if [[ "$BASE_REF" != "develop" && "$BASE_REF" != "main" ]]; then
+            echo "::error::PR target '$BASE_REF' must be develop (or main for a hotfix)."
+            exit 1
+          fi
+
+          bad=$(git log --no-merges --format='%h %s' "$BASE_SHA..$HEAD_SHA" \
+            | grep -vE "^[0-9a-f]+ $HEAD_REF\|" || true)
+          if [[ -n "$bad" ]]; then
+            echo "::error::Commits must start with '$HEAD_REF|':"
+            echo "$bad"
+            exit 1
+          fi
+
+          echo "Branch and commits follow the git flow."
