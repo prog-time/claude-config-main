@@ -95,6 +95,8 @@ Skill creation loop:
 
 - [ ] `description` contains concrete trigger phrases.
 - [ ] `description` contains explicit "when NOT to use" lines.
+- [ ] `description` uses the literal `|` block, not folded `>`.
+- [ ] `allowed-tools` is declared with a minimal (least-privilege) set.
 - [ ] `SKILL.md` is under 500 lines.
 - [ ] Long references are moved to `references/`.
 - [ ] Every step in the body is concrete and unambiguous.

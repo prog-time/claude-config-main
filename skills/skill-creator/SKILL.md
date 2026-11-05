@@ -57,6 +57,12 @@ Use the existing generator:
 This creates `skills/<name>/` with `SKILL.md` and `README.md` stubs. Do not create
 the folder manually — the generator enforces naming conventions.
 
+The `SKILL.md` is rendered from the canonical template
+`assets/SKILL.md.template`, so the stub already has the correct frontmatter
+shape: a literal (`|`) `description` block and an `allowed-tools` list. Keep
+that shape — fill in the placeholders, do not switch `description:` to folded
+(`>`) or drop `allowed-tools`.
+
 ### Step 4 — Write the `description`
 
 This is the most important part. The description is the ONLY thing Claude sees in
@@ -135,9 +141,13 @@ Do NOT run `git commit` or `make install` without explicit confirmation.
 
 - One skill = one task. Refuse to create multi-purpose skills.
 - Never skip Step 1 (scope) — a vague skill will never trigger correctly.
-- Always use `scripts/new_skill.sh` for scaffolding.
+- Always use `scripts/new_skill.sh` for scaffolding (it renders from
+  `assets/SKILL.md.template` — the canonical SKILL.md shape).
 - Keep `SKILL.md` under 500 lines; move depth to `references/`.
-- Description must include assertive triggers AND exclusions.
+- Description must include assertive triggers AND exclusions, and use the
+  literal `|` block (never folded `>`).
+- Declare a minimal `allowed-tools` set (least privilege) — the scaffold seeds
+  it; trim it to what the skill actually uses. Never leave it absent.
 - Do not commit or install without user confirmation.
 
 ## Examples

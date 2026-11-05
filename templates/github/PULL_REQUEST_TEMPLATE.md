@@ -24,7 +24,3 @@ Closes #
 ## Notes for reviewer
 
 <!-- Optional: trade-offs, areas of uncertainty, screenshots, migration steps. -->
-
----
-
-_The task was generated using the MCP server — [prog-time/mcp-github-issues](https://github.com/prog-time/mcp-github-issues)._

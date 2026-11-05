@@ -91,6 +91,13 @@ Dockerfile best practices:
    - Health check verification
    - Rollback procedure
 3. Document the deployment process.
+4. Fit the shared delivery model (`skills/ci-setup/references/delivery.md`):
+   one deploy command that takes the environment name (`test` |
+   `production`), called from `.github/workflows/deploy.yml`. `test` ships
+   when CI is green on `main`; `production` ships on a `v*` tag or
+   *Run workflow*. Never deploy from `develop` or feature branches, and
+   never wire a deploy into the CI workflow — hand the workflow itself
+   to `ci-setup`.
 
 ### Mode 4 — Monitoring & Health
 

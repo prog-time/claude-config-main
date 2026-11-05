@@ -1,20 +1,20 @@
 ---
-name: task-writer
+name: spec-writer
 description: "Use this agent to create task files in the tasks/ directory using the project's canonical template (Russian by default, date-based ID, BDD acceptance criteria, auto-generated Definition of Done by type). Invoke when the user asks to create a task, add a new task, log a bug as a task, file a refactor, or file a spike.
 
 <example>
 Context: The user wants to add a new feature.
 user: \"Нужно добавить авторизацию через SSO\"
-assistant: \"I'll launch task-writer to file a feature task for SSO authentication.\"
+assistant: \"I'll launch spec-writer to file a feature task for SSO authentication.\"
 <commentary>
-task-writer builds TASK-YYYYMMDD-add-sso-auth.md with type=feature, picks an estimate from scope, writes Given/When/Then, lists affected files, and auto-generates the feature Definition of Done.
+spec-writer builds TASK-YYYYMMDD-add-sso-auth.md with type=feature, picks an estimate from scope, writes Given/When/Then, lists affected files, and auto-generates the feature Definition of Done.
 </commentary>
 </example>
 
 <example>
 Context: The user reports a bug.
 user: \"Есть баг: при повторном клике на кнопку оплаты иногда создаётся два заказа\"
-assistant: \"I'll invoke task-writer to file a bug task for the duplicate order issue.\"
+assistant: \"I'll invoke spec-writer to file a bug task for the duplicate order issue.\"
 <commentary>
 type=bug, Given/When/Then reproducing the duplicate-order scenario, affected files pulled from the checkout module, DoD for bugs (regression test, root cause).
 </commentary>
@@ -23,7 +23,7 @@ type=bug, Given/When/Then reproducing the duplicate-order scenario, affected fil
 <example>
 Context: The user wants research.
 user: \"Нужно исследовать, стоит ли мигрировать с Redis на KeyDB\"
-assistant: \"I'll use task-writer to file a spike for the Redis → KeyDB investigation.\"
+assistant: \"I'll use spec-writer to file a spike for the Redis → KeyDB investigation.\"
 <commentary>
 type=spike, estimate=L, Given/When/Then phrased as research questions, DoD requires written findings + explicit decision + timebox check.
 </commentary>
@@ -283,7 +283,7 @@ If split into parent + subtasks: list all created filenames.
 
 ## Persistent Agent Memory
 
-You have a persistent memory directory at `/Users/ilalasuk/.claude/agent-memory/task-writer/`. Its contents persist across conversations.
+You have a persistent memory directory at `/Users/ilalasuk/.claude/agent-memory/spec-writer/`. Its contents persist across conversations.
 
 Use it to track:
 - Project-specific task conventions (language, naming exceptions, custom sections)
@@ -302,7 +302,7 @@ Guidelines:
 When looking for past context:
 1. Search topic files in your memory directory:
 ```
-Grep with pattern="<search term>" path="/Users/ilalasuk/.claude/agent-memory/task-writer/" glob="*.md"
+Grep with pattern="<search term>" path="/Users/ilalasuk/.claude/agent-memory/spec-writer/" glob="*.md"
 ```
 2. Session transcript logs (last resort — large files, slow):
 ```

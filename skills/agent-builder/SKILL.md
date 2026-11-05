@@ -55,7 +55,7 @@ Answer these before writing anything. Ask the user if any are unclear:
 - What does it produce? (files, reports, commits, decisions, code)
 - What triggers it? List 2–3 concrete user requests.
 - What should it never do? (to avoid overlap)
-- Is it a pipeline agent (team-lead can invoke it) or standalone?
+- Is it a pipeline agent (the team-lead skill can route to it) or standalone?
 
 ### Step 3 — Design the structure
 
@@ -81,15 +81,27 @@ Apply corrections. Do NOT write the file yet.
 After explicit confirmation, write to `agents/<name>.md` using the canonical
 structure below.
 
-### Step 6 — Update team-lead.md if needed
+### Step 6 — Update the team-lead skill if needed
 
-If the new agent is a pipeline agent:
+If the new agent is a pipeline agent (one the team-lead skill can route to):
 
-- Read `agents/team-lead.md`.
-- Add the agent to the Available Agents table with a clear "When to use".
-- Update the example pipeline if relevant.
+- Read `skills/team-lead/SKILL.md`.
+- Add the agent to the Step 2 routing table (`Task type` → `Best-fit agent`).
+- If the agent introduces a new sequencing constraint, note it under the
+  ordering rules.
 
-### Step 7 — Offer to commit
+### Step 7 — Lint
+
+Validate the new agent's frontmatter with the repository linter:
+
+```bash
+make lint        # or: python3 scripts/lint_skills.py
+```
+
+This checks frontmatter validity, `description` length (≤ 1024 chars), and that
+`name` matches the file stem. Fix any reported errors before continuing.
+
+### Step 8 — Offer to commit
 
 Ask whether the user wants to commit the new/changed `.md` files. Do not
 commit without explicit confirmation.
@@ -234,7 +246,8 @@ assistant: "[how the assistant responds, naming the agent]"
 - [ ] Self-verification checklist items are binary and specific
 - [ ] Persistent memory section uses the correct path
 - [ ] Agent file was presented to the user and confirmed before writing
-- [ ] If pipeline agent: `team-lead.md` was updated
+- [ ] If pipeline agent: the routing table in `skills/team-lead/SKILL.md` was updated
+- [ ] `make lint` passed with no errors
 - [ ] User was asked whether to commit
 
 ## Examples

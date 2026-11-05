@@ -59,6 +59,15 @@ To uninstall:
 make uninstall      # removes only our symlinks, does not touch Anthropic built-ins
 ```
 
+After deleting or renaming a skill, agent, or command, clean up the leftover links:
+
+```bash
+make prune          # removes our symlinks whose target is gone from the repo
+```
+
+`install.sh` never links dot-files, `__pycache__`, `commands/README.md`, or
+`commands/*_example.md`. Otherwise Claude Code would list the last two as slash commands.
+
 ## Adding a new skill
 
 ```bash
@@ -90,9 +99,9 @@ Claude Code:
 
 | Command | Purpose |
 |---------|---------|
-| `/task_create` | Create a task file in `tasks/` and a linked GitHub Issue via `mcp-github-issues`. |
+| `/task_create` | Create a task file in `tasks/` and a linked GitHub Issue via the `gh` CLI. |
 | `/task_sync` | Sync GitHub Issues with local `github-tasks.json` — create missing local tasks, comment on done ones. |
-| `/task_complete` | Prepare the working tree and branch for a task, then hand the task off to the `team-lead` agent. |
+| `/task_complete` | Prepare the working tree and branch for a task, then hand the task off to the `team-lead` skill. |
 
 ## CI
 

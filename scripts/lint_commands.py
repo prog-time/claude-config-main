@@ -164,7 +164,7 @@ def check_command(path: Path, error_keys: set[str], report_sections: set[str]) -
 def check_shared_files() -> None:
     for required in (CONTRACT, ERROR_TEMPLATES, REPORT_TEMPLATES,
                      SHARED_DIR / "workflow.md",
-                     SHARED_DIR / "project-resolution.md"):
+                     SHARED_DIR / "repo-resolution.md"):
         if not required.is_file():
             errors.append(f"missing required foundation file: {required.relative_to(REPO)}")
 

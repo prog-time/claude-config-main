@@ -1,5 +1,5 @@
 ---
-description: Execute a task on the current issues-{N} branch via team-lead, then deliver via /task_submit
+description: Execute a task on the current issues-{N} branch via the team-lead skill, then deliver via /task_submit
 argument-hint: <tasks/TASK-*.md path | GitHub issue URL>
 contract: _contract.md
 ---
@@ -12,7 +12,7 @@ contract: _contract.md
 
 Single entry point for task execution: prepares the `issues-{N}` branch
 (by invoking `/task_branch`), resolves the task spec, hands it to the
-`team-lead` agent, then delegates delivery (commits → push → PR) to
+`team-lead` skill, then delegates delivery (commits → push → PR) to
 `/task_submit`.
 
 Branch preparation is in scope through the `/task_branch` invocation in
@@ -47,7 +47,7 @@ single orchestrator for the full pipeline.
 **Action:** invoke `/task_branch` per `_contract.md` §2, passing
 `task_source` verbatim as `$ARGUMENTS`. `/task_branch` classifies
 the input, resolves `issue_number`, verifies the working tree,
-syncs `main`, and creates or re-enters `issues-{N}`. The current
+syncs `develop`, and creates or re-enters `issues-{N}`. The current
 branch is `issues-{N}` when `/task_branch` completes.
 
 **Capture:** `branch_state` (`new` | `existing`) from the
@@ -59,7 +59,7 @@ branch is `issues-{N}` when `/task_branch` completes.
 
 **Invariants after:** current branch is exactly
 `issues-{issue_number_from_branch}`; contains every commit on
-`main`.
+`develop`.
 
 ### Step 2a — Resolve spec from GitHub URL
 
@@ -69,23 +69,23 @@ branch is `issues-{N}` when `/task_branch` completes.
 1. Match `task_source` against
    `https://github.com/{owner}/{repo}/issues/{N}`; capture `{N}` as
    `issue_number`.
-2. Resolve `project` via `_shared/project-resolution.md`.
-3. Call `mcp__mcp-github-issues__fetch_issue` with `project` and
-   `issue: {N}`.
+2. Apply `_shared/repo-resolution.md` as the gh preflight (confirms
+   `gh` is available and authenticated).
+3. Fetch the issue body, passing the URL directly:
+   `gh issue view {task_source} --json body --jq .body`.
 4. Use the issue body as `task_spec`.
 
 **Capture:** `issue_number` (integer), `task_spec` (string,
-verbatim issue body), `project` (string).
+verbatim issue body).
 
 **Failure modes:**
 - URL malformed → STOP with
   `error-templates.md#malformed-issue-url` (`url={task_source}`).
-- MCP unavailable → STOP with
-  `error-templates.md#mcp-not-connected`
-  (`command=task_complete`).
-- `fetch_issue` fails → STOP with
-  `error-templates.md#mcp-call-failed`
-  (`tool=fetch_issue`, `error=<verbatim>`).
+- `gh` unavailable / unauthenticated → STOP with
+  `error-templates.md#gh-not-available` (`command=task_complete`).
+- `gh issue view` fails → STOP with
+  `error-templates.md#tool-call-failed`
+  (`tool=gh issue view`, `error=<verbatim>`).
 
 ### Step 2b — Resolve spec from local file
 
@@ -128,30 +128,32 @@ verbatim file contents).
 refers to. Branch switching is performed by `/task_branch` in
 Step 2.5; this command performs no inline branch switching.
 
-### Step 4 — Hand the task off to `team-lead`
+### Step 4 — Hand the task off to the `team-lead` skill
 
 **Preconditions:** `task_spec`, `issue_number`, current branch all
 settled.
-**Action:** invoke the `team-lead` agent via the Agent tool with a
-self-contained prompt containing:
+**Action:** invoke the `team-lead` skill via the Skill tool with a
+self-contained `args` payload containing:
 
 - **Task spec** — `task_spec` verbatim (no summarisation, no
   trimming).
 - **Linked GitHub Issue** — `#{issue_number}` (and URL if known).
 - **Current branch** — `issues-{issue_number}`.
-- **Instructions** — plan and execute the pipeline per the
-  `team-lead` spec; never invoke `agent-builder`; produce the
-  Project Execution Report in its standard shape.
+- **Instructions** — analyse the task, route it adaptively (one
+  agent if simple, a chain if complex), delegate, and log per the
+  `team-lead` spec; never invoke `agent-builder`; return the strict
+  JSON result.
 
 **Capture:** `team_lead_outcome` (`success` | `blocked` |
-`partial`), `team_lead_report` (verbatim final report from the
-agent).
+`partial`) from the top-level `outcome` in the skill's JSON output
+(a top-level `error` object maps to `blocked`); `team_lead_report`
+(the skill's JSON output verbatim).
 
 **Failure modes:**
-- The Agent tool itself errors (e.g., missing agent type, crash) →
-  STOP with `error-templates.md#mcp-call-failed`
-  (`tool=Agent[team-lead]`, `error=<verbatim>`). (Re-using the
-  `mcp-call-failed` template for tool-call failures keeps one
+- The Skill tool itself errors (e.g., missing skill, crash) →
+  STOP with `error-templates.md#tool-call-failed`
+  (`tool=Skill[team-lead]`, `error=<verbatim>`). (Re-using the
+  `tool-call-failed` template for tool-call failures keeps one
   failure shape.)
 
 **Invariants after:** `team_lead_report` is captured; the decision
@@ -233,10 +235,11 @@ Delivery:      skipped — team-lead outcome `{team_lead_outcome}`
   defensive invariant, not a recovery path.
 - Delivery is out of scope for the inline body. Commits, push, and
   PR always go through `/task_submit`. No parallel fallback.
-- `task_spec` is passed to `team-lead` verbatim. No summarisation,
-  no paraphrasing, no section trimming.
-- Never invoke `agent-builder` from the `team-lead` pipeline.
-- Never call `gh` CLI. Use `mcp-github-issues` tools only.
+- `task_spec` is passed to the `team-lead` skill verbatim. No
+  summarisation, no paraphrasing, no section trimming.
+- Never invoke `agent-builder` from the `team-lead` flow.
+- GitHub access is `gh` CLI only, against the `origin`
+  repository. No project registry.
 - Branch name is literal `issues-{N}`.
 - Delivery only on `team_lead_outcome == success`. `blocked` and
   `partial` outcomes are reported, not recovered.
