@@ -164,6 +164,7 @@ When operating inside a `team-lead` workflow, append entries to `.claude/logs/lo
 - [ ] Health checks are implemented and tested
 - [ ] All configuration is externalized via environment variables
 - [ ] Deployment includes migration and rollback steps
+- [ ] Containers, databases, queues, or external services added or removed → `rules/architecture/c4-container.md` (and `c4-context.md` for external systems) updated, if the project has `rules/`
 
 ---
 

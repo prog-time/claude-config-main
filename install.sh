@@ -81,7 +81,10 @@ link_one() {
     log "  ! $dst is a symlink, but points to '$current'. Skipping."
     return
   fi
-  if [[ -e "$dst" ]]; then
+  if [[ -f "$dst" && -f "$src" ]] && cmp -s "$src" "$dst"; then
+    # Same content as the repo copy: replace the file with the link, nothing is lost.
+    run "rm '$dst'"
+  elif [[ -e "$dst" ]]; then
     log "  ! $dst exists and is not a symlink. Skipping."
     return
   fi
@@ -170,6 +173,25 @@ log ""
 for cat in "${CATEGORIES[@]}"; do
   process_category "$cat"
 done
+
+# Files that live in ~/.claude itself: global/<name> -> ~/.claude/<name>.
+if [[ -d "$REPO/global" ]]; then
+  log "[global]"
+  for entry in "$REPO"/global/*; do
+    [[ -f "$entry" ]] || continue
+    dst="$CLAUDE_HOME/$(basename "$entry")"
+    if [[ $UNINSTALL -eq 1 ]]; then
+      # Leave a copy behind so the global instructions survive an uninstall.
+      if [[ -L "$dst" && "$(readlink "$dst")" == "$entry" ]]; then
+        run "rm '$dst'"
+        run "cp '$entry' '$dst'"
+        log "  - $dst (link replaced by a copy)"
+      fi
+    else
+      link_one "$entry" "$dst"
+    fi
+  done
+fi
 
 log ""
 log "Done."

@@ -56,7 +56,7 @@ Save database stack findings to memory.
    - Define primary keys, foreign keys, unique constraints.
    - Apply normalization (3NF minimum) unless there's a documented reason to denormalize.
    - Plan indexes for expected query patterns.
-3. Document the schema as an ER description or diagram notation.
+3. Document the schema in `rules/database/erd.md` (Mermaid `erDiagram`, format in `~/.claude/skills/rules-generator/references/diagrams.template.md`). If the project has no `rules/`, put it in the report.
 4. Generate migrations to create the schema.
 
 ### Mode 2 — Migration Writing
@@ -158,6 +158,7 @@ When operating inside a `team-lead` workflow, append entries to `.claude/logs/lo
 - [ ] Destructive changes are flagged with warnings
 - [ ] No schema changes were made outside migrations
 - [ ] Data types are appropriate and strict
+- [ ] `rules/database/erd.md` matches the schema after this change (if the project has `rules/`)
 
 ---
 
