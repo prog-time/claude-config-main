@@ -6,9 +6,13 @@
 
 set -euo pipefail
 
-input="$(cat)"
-prompt="$(jq -r '.prompt // ""' <<<"$input")"
-cwd="$(jq -r '.cwd // ""' <<<"$input")"
+# The payload is one line of JSON. Bound the read: if stdin stays open with
+# nothing to read, a plain `cat` would hang until the hook timeout. This hook is
+# advisory, so on missing or malformed input it does nothing and lets the prompt through.
+IFS= read -r -t 2 input || true
+[[ -n "${input:-}" ]] || exit 0
+prompt="$(jq -r '.prompt // ""' <<<"$input" 2>/dev/null)" || exit 0
+cwd="$(jq -r '.cwd // ""' <<<"$input" 2>/dev/null)" || exit 0
 [[ -n "$cwd" ]] || cwd="$PWD"
 
 # Empty prompts and slash commands are explicit — nothing to offer.
