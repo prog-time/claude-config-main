@@ -1,49 +1,45 @@
 # rules-generator
 
-A thin **orchestrator** skill. It generates a complete `rules/` AI knowledge
-base — master README, meta rules, database schema docs, one domain file per
-business domain, an API contract file, and six process files (architecture,
-observability, AI workflow, CI/CD, security, testing) — but it does **not** do
-the work itself.
+Creates or audits `rules/`, a small, fixed-layout map of a project that a
+person and Claude can both rely on. It works for any stack.
 
-The skill handles the orchestration-level concerns (resolve the template
-directory, resolve the project root, check for an existing `rules/`, monorepo
-prompt) and then delegates the codebase analysis and file generation to the
-**`rules-writer` agent** via the Agent tool, relaying its JSON report. The agent
-runs the mandatory Phase 0 analysis (migrations, models, services, routes,
-policies, jobs, `.env.example`) and writes every file from the templates under
-`references/` in an isolated context. Nothing is invented — every extracted rule,
-table, and domain comes from real evidence in the code; the six `process/` files
-are adopted conventions, flagged as such.
+```text
+rules/
+├─ README.md            map: stack, run/test, "before you change → read"
+├─ sync.yml             code paths behind each schema (used by rules-check)
+├─ architecture/        C4 Context + Container (+ optional Component), Mermaid
+├─ database/erd.md      ERD, Mermaid
+└─ api/                 openapi.yaml (generated from code) + postman.json
+```
 
-Because the work lives in an agent, `rules/` generation is also routable as a
-stage by the `team-lead` orchestrator.
+Monorepos get a system level (`rules/` at the root: service map, C4 Context and
+Container) and a service level (`{service}/rules/`: ERD, API, C4 Component).
+The full specification is in [`references/layout.md`](references/layout.md).
+
+The skill is a thin orchestrator. It picks the mode, the roots, and the layout,
+then delegates analysis and writing to the
+[`rules-writer`](../../agents/rules-writer.md) agent.
+
+## Modes
+
+- **`init`**: creates every missing file from real code. Never overwrites.
+- **`audit`**: read-only. Lists missing files and diagrams that disagree with the
+  code. It also points out an old-layout `rules/` (`process/`, `_meta/`, `domain/`).
+
+## Usage
+
+- "сгенерируй rules", "создай rules", "сделай C4 и ERD"
+- "проверь rules", "audit rules against the code"
+
+## Structure
+
+- `SKILL.md`: triggers, workflow, rules
+- `references/layout.md`: canonical layout and file rules
+- `references/readme.template.md`: `rules/README.md` skeleton
+- `references/sync.template.yml`: `rules/sync.yml` skeleton
+- `references/diagrams.template.md`: C4, ERD, and ADR skeletons
+- `references/api-generators.md`: code → OpenAPI per stack, OpenAPI → Postman
 
 ## Installation
 
 Picked up automatically after `make install` at the repository root.
-
-## Usage
-
-Trigger phrases (English and Russian):
-
-- "generate rules for this project"
-- "create a rules/ directory"
-- "document the codebase for AI agents"
-- "set up an AI knowledge base"
-- "сгенерируй rules"
-- "создай rules"
-- "документируй проект для AI"
-
-## Structure
-
-- `SKILL.md` — trigger description, workflow, rules
-- `references/rules-readme.template.md` — master `rules/README.md` template
-- `references/how-to-write-rules.template.md` — `_meta/` template
-- `references/database-schema.template.md` — `database/schema.md` template
-- `references/domain.template.md` — per-domain template
-- `references/api-endpoints.template.md` — `api/endpoints.md` template
-- `references/process-templates.md` — all six process templates in one file
-
-Templates are loaded on demand — only when the skill is about to write the
-corresponding output file — to keep the conversation context small.

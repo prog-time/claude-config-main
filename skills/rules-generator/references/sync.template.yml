@@ -1,0 +1,22 @@
+# Template — rules/sync.yml
+# Code paths each schema describes. rules-check warns when a path changes
+# without its schema; CI fails. Globs are relative to the directory that holds
+# rules/. Drop a section the project does not have. Keep this flat subset of
+# YAML: section → key → scalar or a list of quoted strings.
+
+api:
+  paths:
+    - "<glob of routes, controllers, handlers, request/response schemas>"
+  # Command that writes rules/api/openapi.yaml from code. Leave empty when the
+  # stack has no generator: then openapi.yaml is edited by hand.
+  generate: ""
+  # Contract file inside rules/api/: openapi.yaml | schema.graphql | <name>.proto
+  contract: "openapi.yaml"
+
+database:
+  paths:
+    - "<glob of migrations, ORM models, schema or DDL files>"
+
+architecture:
+  paths:
+    - "<docker-compose / k8s / terraform, dependency manifests, service entry points>"

@@ -1,18 +1,18 @@
 ---
 name: rules-generator
 description: |
-  Orchestrates generation of a complete `rules/` AI knowledge base for a
-  project: handles pre-checks (existing `rules/`, monorepo, template path),
-  then delegates the codebase analysis and file generation to the
-  `rules-writer` agent via the Agent tool, and relays its report. Use ALWAYS
-  when the user says "generate rules", "generate rules for this project",
-  "create a rules/ directory", "document the codebase for AI agents", "set up
-  an AI knowledge base", "сгенерируй rules", "создай rules", "построй rules/",
-  "документируй проект для AI", "сделай AI knowledge base", or asks to
-  bootstrap AI-ready project documentation derived from real code. Do NOT use
-  for: editing a single existing rules file (use Edit), writing a README or
-  CHANGELOG (use docs-quality), authoring blog posts (use blog-article-writer),
-  or creating skills/agents.
+  Creates or audits a project's `rules/` directory, which has the same minimal
+  layout in every project and stack: a README map, sync.yml, C4 diagrams
+  (Mermaid), an ERD (Mermaid), and the API contract (OpenAPI generated from
+  code, plus a Postman collection). Monorepos get a system level and a service
+  level. The skill runs pre-checks, then delegates the code analysis and the
+  writing to the `rules-writer` agent. Use ALWAYS when the user says "generate
+  rules", "create a rules/ directory", "audit rules", "check rules against the
+  code", "make C4/ERD diagrams for this project", "document the codebase for AI
+  agents", "сгенерируй rules", "создай rules", "проверь rules", "сделай C4",
+  "сделай ERD", "документируй проект для AI". Do NOT use for: editing a single
+  diagram after a code change (edit it directly), README/CHANGELOG (use
+  docs-quality), blog posts, or creating skills/agents.
 allowed-tools:
   - Read
   - Bash
@@ -23,95 +23,45 @@ allowed-tools:
 
 # Rules Generator
 
-A thin orchestrator. It does **not** analyze code or write files itself — it
-prepares the inputs, delegates the heavy work to the `rules-writer` agent (which
-runs Phase 0 analysis and writes every file from the templates in an isolated
-context), and relays the agent's JSON report.
+A thin orchestrator. It picks the mode and the roots, then delegates to the
+`rules-writer` agent, which analyzes the code and writes the files in an
+isolated context. The skill never writes `rules/` files itself.
 
-The canonical templates ship with this skill, in `references/`. The agent reads
-them; this skill just tells the agent where they are.
+The canonical layout and templates live in `references/`:
+
+- `layout.md`: the layout, naming, and file rules. This is the source of truth.
+- `readme.template.md`, `sync.template.yml`, `diagrams.template.md`: file skeletons.
+- `api-generators.md`: how to pick the code → OpenAPI command and build the Postman collection.
+
+## Modes
+
+| Mode | When | What happens |
+|---|---|---|
+| `init` | user asks to create or generate | creates every missing file from the layout; **never overwrites** an existing file |
+| `audit` | user asks to check, or `rules/` already exists | read-only: lists missing files and diagrams that disagree with the code |
+
+To regenerate a file, the user deletes it and runs `init` again.
 
 ## Workflow
 
-### Step 1 — Resolve the template directory
+1. **Resolve `template_dir`.** It is the absolute path of this skill's `references/`.
+2. **Resolve `target_root`.** Use `git rev-parse --show-toplevel`. If the directory is not a git repo, use the CWD and warn.
+3. **Pick the mode.** An explicit request wins. Otherwise: no `rules/` → `init`; `rules/` exists → `audit`, then offer `init` to fill the gaps it found.
+   If `rules/` contains the old layout (`process/`, `_meta/`, `domain/`, `database/schema.md`, `api/endpoints.md`), run `audit`. Its report says what to keep, for example project-specific rules that move to `rules/README.md`. Delete nothing.
+4. **Detect the shape.** If there are several deployable services (several manifests under `apps/`, `services/`, `packages/`, or several services in docker-compose), it is a monorepo. Pass `layout: monorepo` and the list of service roots. Do not ask unless the service list is ambiguous.
+5. **Delegate.** Invoke the `rules-writer` agent with `template_dir`, `target_root`, `mode`, `layout` (`single` or `monorepo`), `services[]`, and the user's request verbatim.
+6. **Relay** the agent's JSON report as a short summary: files created, generators chosen or suggested, gaps, deviations. Surface errors verbatim and do not write files as a fallback.
 
-The templates live next to this `SKILL.md`, in `references/`. Resolve the
-absolute path to that directory — this becomes `template_dir` for the agent.
+## Rules
 
-### Step 2 — Resolve the target project root
-
-Run `git rev-parse --show-toplevel`.
-
-- Success → `target_root` is that path.
-- Not a git repo → use the current working directory and warn the user that the
-  location was inferred from CWD.
-
-### Step 3 — Pre-checks (decide `mode`, never clobber silently)
-
-- **`rules/` does not exist** → `mode: full`.
-- **`rules/` already exists** → ask the user: overwrite (`full`), fill gaps only
-  (`gap-fill`), or abort. Default to **abort** on no answer. Never silently
-  overwrite.
-- **Monorepo with multiple apps** → ask which app to document (set `target_root`
-  to that app's root), or run once per app.
-
-### Step 4 — Delegate to the `rules-writer` agent
-
-Invoke the `rules-writer` agent via the Agent tool. Pass a self-contained prompt
-with:
-
-- **`template_dir`** — the absolute path from Step 1.
-- **`target_root`** — from Step 2.
-- **`mode`** — `full` or `gap-fill` from Step 3.
-- **The user's original request**, verbatim.
-
-The agent runs the full Phase 0 analysis, writes the mandatory structure from the
-templates, lints the output, and returns a JSON completion report.
-
-### Step 5 — Relay the report
-
-Capture the agent's JSON report and present it. If the agent reports an error or
-a blocking deviation, surface it; do not retry or write files yourself.
-
-## Rules (non-negotiable)
-
-- **Never analyze code or write `rules/` files yourself.** This skill routes —
-  the `rules-writer` agent does the work.
-- **Never overwrite an existing `rules/`** without explicit user choice
-  (`full` vs `gap-fill` vs abort).
-- **Always pass `template_dir`** so the agent reads the canonical templates,
-  never invents structure.
-- **Do not invoke `agent-builder`.**
+- Never write or overwrite `rules/` files from the skill. The agent writes, and only in `init`.
+- Never add dependencies (generators, CLIs) to the project. The agent only suggests them.
+- Do not invoke `agent-builder`.
 
 ## Examples
 
-### Example 1 — Standard bootstrap
+**User:** сгенерируй rules для проекта → no `rules/`, single service → `init`, `layout: single`.
 
-**User:** сгенерируй rules для этого проекта
+**User:** проверь, что схемы актуальны → `audit`. Relay the list of drift items.
 
-**Assistant:** *(resolves `template_dir` and `target_root`, finds no existing
-`rules/` → `mode: full`, delegates to the `rules-writer` agent, relays its JSON
-report)*
-
-### Example 2 — Existing rules/ present
-
-**User:** create a rules/ directory
-
-**Assistant:** "`rules/` already exists. Overwrite, fill gaps only, or abort?"
-*(waits, then delegates to `rules-writer` with the chosen `mode`)*
-
-### Example 3 — Monorepo
-
-**User:** документируй проект для AI
-
-**Assistant:** "This looks like a monorepo (`apps/web`, `apps/api`). Which app
-should I document — or both?" *(delegates once per chosen app root)*
-
-## Edge Cases
-
-- **Not a git repo** — infer `target_root` from CWD and warn.
-- **User requests partial output** (only schema, only API) — the `rules-writer`
-  agent produces the complete mandatory structure; for targeted edits, point the
-  user at Edit.
-- **Agent returns a blocking error** — surface it verbatim; do not fall back to
-  writing files inline.
+**User:** сделай C4 и ERD для этого монорепо → `init`, `layout: monorepo`, `services: [apps/api, apps/worker]`.
