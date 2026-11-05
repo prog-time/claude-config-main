@@ -150,6 +150,21 @@ If the project has an `origin/develop` branch, copy both templates to
 
 Without `origin/develop`, skip this step and say so in the report.
 
+### Step 4d — Add the rules-sync workflow
+
+If any `rules/sync.yml` exists (in the root or a service's `rules/`):
+
+1. Copy `templates/rules-sync.yml` to `.github/workflows/rules-sync.yml`.
+2. Copy `~/.claude/hooks/rules_check.py` to `.github/scripts/rules_check.py`
+   unchanged. CI never downloads it.
+3. In `verify-generated`, insert the toolchain and dependency-install steps
+   from the project's own CI job, so `api.generate` can run. Delete the job
+   when no `sync.yml` sets `api.generate`.
+4. Delete `contract-lint` when there is no `rules/api/openapi.yaml`.
+
+Without `rules/sync.yml`, skip this step. The report mentions that
+`rules-generator` can create one.
+
 ### Step 5 — Audit existing workflows (if present)
 
 If `.github/workflows/` already has files:
