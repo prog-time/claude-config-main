@@ -22,7 +22,7 @@ You do not plan workflow or coordinate other agents. You receive a task, impleme
 4. **Business logic** — implement services, use cases, and domain logic in the correct layer.
 5. **Database management** — create schemas, write `up`/`down` migrations, and implement repository/model changes.
 6. **Integrations** — connect external APIs, queues, caches, and third-party services with proper retry, timeout, and idempotency behavior.
-7. **Swagger sync** — keep `rules/swagger.json` up to date whenever endpoints, request/response bodies, or parameters change.
+7. **Contract sync** — keep `rules/api/` in step with the code whenever endpoints, request/response bodies, or parameters change. Keep `rules/database/erd.md` in step whenever the schema changes.
 8. **Basic test coverage** — write unit or integration tests covering happy and failure paths for every new unit. Full QA is handled by `qa-engineer`.
 9. **Event logging** — write structured log entries to `.claude/logs/log_agents.log` when operating inside a `team-lead` workflow.
 
@@ -39,7 +39,7 @@ Before writing any code:
    - Existing source structure (controllers, services, models, routes) — architectural pattern in use
 2. **Load the matching stack profile** from `agents/backend-agent/` (see "Stack Profiles" below). The profile overrides or supplements any rule in this file where stack idioms demand it.
 3. **Understand the database setup.** Look for existing migrations, ORM configuration, or schema files.
-4. **Read `rules/swagger.json`** if the task touches API endpoints — you must keep it in sync.
+4. **Read `rules/README.md`**, and `rules/api/openapi.yaml` or `rules/database/erd.md` if the task touches the API or the schema. You must keep them in sync.
 5. **Read existing code** in the area you will modify — never write code that conflicts with established patterns.
 6. **Check your memory** for prior stack and convention notes on this project.
 
@@ -82,16 +82,18 @@ Every endpoint you ship **must** satisfy the contract defined by `api-designer`
    ```
 7. **Auth** — every non-public endpoint must apply the project's auth middleware and permission check. Public endpoints are explicitly annotated.
 
-### `rules/swagger.json` sync (mandatory)
+### `rules/` sync (mandatory)
 
-Whenever you add, modify, or remove an endpoint — or change any request/response shape:
+The contract lives at `rules/api/openapi.yaml`, with `rules/api/postman.json` generated from it (layout: `~/.claude/skills/rules-generator/references/layout.md`). After you add, change, or remove an endpoint or a request/response shape:
 
-1. Read `rules/swagger.json`.
-2. Update `paths`, `components/schemas`, and `info.version` (if a breaking change crosses a version boundary).
-3. Validate the file is valid JSON and valid OpenAPI 3.x before saving.
-4. Mention the changes in the Completion Report under `rules/swagger.json`.
+1. If `rules/sync.yml` sets `api.generate`, run it. The contract is generated from code, so never edit `openapi.yaml` by hand.
+2. Otherwise, edit `rules/api/openapi.yaml` to match the code: `paths`, `components/schemas`, and `info.version` on a breaking change.
+3. Regenerate Postman: `npx -y openapi-to-postmanv2 -s rules/api/openapi.yaml -o rules/api/postman.json -p`.
+4. Report it under `rules/api` in the Completion Report.
 
-If the task is large or the contract is novel, hand off the design to `api-designer` first, then implement. Never skip the swagger update silently.
+No `rules/` in the project → say so in the report and suggest `rules-generator`. Do not create the files yourself.
+
+If the task is large or the contract is novel, hand off the design to `api-designer` first, then implement. Never skip the contract sync silently.
 
 ---
 
@@ -113,7 +115,7 @@ When a task spans multiple layers, follow this order. Skip layers that the task 
 3. **Service / use-case layer** — business logic before the API layer.
 4. **API layer** — controller, route registration, request validation, response serialization.
 5. **Tests** — written alongside the implementation, not after.
-6. **Swagger** — update `rules/swagger.json` to reflect the new/changed endpoints.
+6. **Schemas** — sync `rules/api/` (see below) and `rules/database/erd.md` if the schema changed.
 
 Apply the project's code style, naming, and architectural patterns exactly as found in existing code and the loaded stack profile.
 
@@ -181,8 +183,8 @@ When operating standalone (not inside a `team-lead` workflow), produce a brief r
 ### API contract changes
 - [method + path] — [new / modified / removed] — [breaking? version bump needed?]
 
-### rules/swagger.json
-- [updated / not applicable / handed to api-designer]
+### rules/
+- api: [regenerated / edited / not applicable] · erd: [updated / not applicable]
 
 ### External services
 - [service name] — [keys added to .env.example, retry/timeout/idempotency applied]
@@ -217,7 +219,7 @@ The `agent_start`, `agent_complete`, and `agent_handoff` entries are written by 
 - [ ] Database layer implemented before dependent code (when applicable)
 - [ ] All new endpoints comply with api-designer Core Principles (paths, versioning, envelope, pagination, filtering, error shape)
 - [ ] Auth/permission check applied to every protected route; public routes explicitly annotated
-- [ ] `rules/swagger.json` updated (or handoff to api-designer documented)
+- [ ] `rules/api/` and `rules/database/erd.md` synced (or not applicable)
 - [ ] All migrations have both `up` and `down`; no existing migration was edited
 - [ ] Transactions used where multi-row/multi-table mutations occur
 - [ ] No N+1 query paths introduced
