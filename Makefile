@@ -1,4 +1,4 @@
-.PHONY: help install uninstall lint lint-md lint-yaml new-skill check doctor
+.PHONY: help install uninstall prune lint lint-md lint-yaml new-skill check doctor
 
 CLAUDE_HOME ?= $(HOME)/.claude
 REPO := $(shell pwd)
@@ -8,6 +8,7 @@ help:
 	@echo ""
 	@echo "  make install       create symlinks in $(CLAUDE_HOME)"
 	@echo "  make uninstall     remove symlinks (leaves built-in skills alone)"
+	@echo "  make prune         install + remove stale symlinks into this repo"
 	@echo "  make lint          validate SKILL.md and agents/*.md"
 	@echo "  make lint-md       run markdownlint on *.md"
 	@echo "  make lint-yaml     run yamllint on *.yml/*.yaml"
@@ -20,6 +21,9 @@ install:
 
 uninstall:
 	@./install.sh --uninstall
+
+prune:
+	@./install.sh --prune
 
 lint:
 	@python3 scripts/lint_skills.py
