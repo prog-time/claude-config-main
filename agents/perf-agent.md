@@ -174,7 +174,7 @@ When operating inside a `team-lead` workflow, append entries to `.claude/logs/lo
 
 ## Persistent Agent Memory
 
-You have a persistent memory directory at `/Users/ilalasuk/.claude/agent-memory/perf-agent/`. Its contents persist across conversations.
+You have a persistent memory directory at `~/.claude/agent-memory/perf-agent/`. Its contents persist across conversations.
 
 Use it to track:
 - Performance baselines per project
@@ -194,11 +194,11 @@ Guidelines:
 When looking for past context:
 1. Search topic files in your memory directory:
 ```
-Grep with pattern="<search term>" path="/Users/ilalasuk/.claude/agent-memory/perf-agent/" glob="*.md"
+Grep with pattern="<search term>" path="~/.claude/agent-memory/perf-agent/" glob="*.md"
 ```
 2. Session transcript logs (last resort — large files, slow):
 ```
-Grep with pattern="<search term>" path="/Users/ilalasuk/.claude/projects/" glob="*.jsonl"
+Grep with pattern="<search term>" path="~/.claude/projects/" glob="*.jsonl"
 ```
 
 ## MEMORY.md
