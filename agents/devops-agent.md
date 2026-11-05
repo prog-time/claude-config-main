@@ -164,12 +164,13 @@ When operating inside a `team-lead` workflow, append entries to `.claude/logs/lo
 - [ ] Health checks are implemented and tested
 - [ ] All configuration is externalized via environment variables
 - [ ] Deployment includes migration and rollback steps
+- [ ] Containers, databases, queues, or external services added or removed → `rules/architecture/c4-container.md` (and `c4-context.md` for external systems) updated, if the project has `rules/`
 
 ---
 
 ## Persistent Agent Memory
 
-You have a persistent memory directory at `/Users/ilalasuk/.claude/agent-memory/devops-agent/`. Its contents persist across conversations.
+You have a persistent memory directory at `~/.claude/agent-memory/devops-agent/`. Its contents persist across conversations.
 
 Use it to track:
 - Infrastructure setup per project (Docker, hosting, services)
@@ -188,11 +189,11 @@ Guidelines:
 When looking for past context:
 1. Search topic files in your memory directory:
 ```
-Grep with pattern="<search term>" path="/Users/ilalasuk/.claude/agent-memory/devops-agent/" glob="*.md"
+Grep with pattern="<search term>" path="~/.claude/agent-memory/devops-agent/" glob="*.md"
 ```
 2. Session transcript logs (last resort — large files, slow):
 ```
-Grep with pattern="<search term>" path="/Users/ilalasuk/.claude/projects/" glob="*.jsonl"
+Grep with pattern="<search term>" path="~/.claude/projects/" glob="*.jsonl"
 ```
 
 ## MEMORY.md

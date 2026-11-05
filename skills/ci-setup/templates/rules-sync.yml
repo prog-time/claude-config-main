@@ -1,0 +1,73 @@
+# Keeps rules/ schemas in step with the code (see rules/sync.yml).
+# Copy unchanged, plus ~/.claude/hooks/rules_check.py to .github/scripts/.
+# Delete verify-generated when no sync.yml sets api.generate, and contract-lint
+# when the project has no rules/api/openapi.yaml.
+name: rules-sync
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  schemas-changed-with-code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fail when code changed without its schema
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python3 .github/scripts/rules_check.py --range "$BASE_SHA...$HEAD_SHA"
+
+  mermaid-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Render every diagram in rules/
+        run: |
+          set -euo pipefail
+          echo '{"args":["--no-sandbox"]}' > "$RUNNER_TEMP/puppeteer.json"
+          mapfile -t files < <(grep -rl --include='*.md' --exclude-dir=node_modules '```mermaid' . \
+            | grep -E '(^|/)rules/' || true)
+          for f in "${files[@]}"; do
+            echo "Checking $f"
+            npx -y @mermaid-js/mermaid-cli@11 -p "$RUNNER_TEMP/puppeteer.json" \
+              -i "$f" -o "$RUNNER_TEMP/out.md" -q
+          done
+
+  contract-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Lint OpenAPI contracts
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(find . -path ./node_modules -prune -o -path '*/rules/api/openapi.yaml' -print)
+          for f in "${files[@]}"; do
+            npx -y @redocly/cli@1 lint "$f"
+          done
+
+  verify-generated:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # ci-setup: insert the toolchain and dependency-install steps of this
+      # project's own CI job here, so api.generate can run.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fail when the generated contract differs from the committed one
+        run: python3 .github/scripts/rules_check.py --verify-generated
