@@ -111,7 +111,7 @@ Log:
 | `devops` | `devops-agent` |
 | `deps` | `dependency-manager` |
 | `docs` | `docs-quality` |
-| generate `rules/` / AI knowledge base | `rules-writer` |
+| `rules/`: C4, ERD, API contract (create or audit) | `rules-writer` |
 | architecture / code review / decomposition | `tech-lead` |
 | requirements / acceptance criteria | `spec-writer` |
 | anything else | `general-purpose` |
