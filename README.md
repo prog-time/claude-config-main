@@ -59,6 +59,15 @@ To uninstall:
 make uninstall      # removes only our symlinks, does not touch Anthropic built-ins
 ```
 
+After deleting or renaming a skill, agent, or command, clean up the leftover links:
+
+```bash
+make prune          # removes our symlinks whose target is gone from the repo
+```
+
+`install.sh` never links dot-files, `__pycache__`, `commands/README.md`, or
+`commands/*_example.md`. Otherwise Claude Code would list the last two as slash commands.
+
 ## Adding a new skill
 
 ```bash
