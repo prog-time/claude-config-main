@@ -159,8 +159,8 @@ State travels between commands through **explicit channels only**:
   management (`/task_branch`) modifies it.
 - **Filesystem** — `tasks/*.md`, `github-tasks.json`. Written by
   `/task_create`, `/task_sync`; read by others.
-- **GitHub state** — Issues, comments, PRs. Accessed through
-  `mcp-github-issues` only.
+- **GitHub state** — Issues, comments, PRs. Accessed through the
+  `gh` CLI only, targeting the `origin` repository.
 - **Sub-command report outputs** — captured by name per §2.
 
 Commands do **not** communicate via implicit globals, environment

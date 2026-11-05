@@ -27,7 +27,8 @@ A fully-formed `agents/<name>.md` file containing:
 - Workflow, Rules, Output format, Self-verification checklist.
 - Persistent memory section.
 
-Optionally, an updated `agents/team-lead.md` if the agent is a pipeline agent.
+Optionally, an updated routing table in `skills/team-lead/SKILL.md` if the
+agent is a pipeline agent.
 
 ## Workflow summary
 
@@ -35,8 +36,10 @@ Optionally, an updated `agents/team-lead.md` if the agent is a pipeline agent.
 2. Clarify role, output, triggers, exclusions, and pipeline fit.
 3. Draft the full agent content and present to the user.
 4. Write `agents/<name>.md` only after explicit confirmation.
-5. Update `team-lead.md` when the agent belongs in the orchestration pipeline.
-6. Offer to commit — never commit without confirmation.
+5. Update the routing table in `skills/team-lead/SKILL.md` when the agent
+   belongs in the orchestration pipeline.
+6. Run `make lint` to validate the agent's frontmatter.
+7. Offer to commit — never commit without confirmation.
 
 ## Installation
 

@@ -1,0 +1,90 @@
+# Canonical delivery workflow — shared by every project.
+#   test        deployed automatically when the `CI` workflow succeeds on a push to main
+#   production  deployed on a `v*` tag push (git tag v1.0.0 && git push --tags),
+#               or manually via "Run workflow" (pick the tag in the ref selector).
+#               Enable Required reviewers on the `production` environment to get an
+#               approval button before rollout.
+# Requirements: the CI workflow is named exactly `CI`; environments `test` and
+# `production` exist in Settings → Environments. Replace __DEPLOY_COMMAND__ with the
+# project's real deploy command (it receives the environment name).
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  deploy-test:
+    name: Deploy to test
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    environment: test
+    concurrency:
+      group: deploy-test
+      cancel-in-progress: false
+    steps:
+      - name: Checkout the commit CI verified
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Deploy
+        run: __DEPLOY_COMMAND__ test
+
+  verify-release:
+    name: Verify release
+    if: >-
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+      github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify the commit is on main
+        run: |
+          git fetch origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::$GITHUB_REF ($GITHUB_SHA) is not on main. Production deploys only code merged into main."
+            exit 1
+          fi
+
+      - name: Verify CI passed on this commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          conclusion="$(gh run list -R "$GITHUB_REPOSITORY" --workflow CI --commit "$GITHUB_SHA" \
+            --event push --json conclusion --jq '.[0].conclusion // ""')"
+          if [ "$conclusion" != "success" ]; then
+            echo "::error::CI on $GITHUB_SHA is '${conclusion:-missing}', not 'success'."
+            exit 1
+          fi
+
+  deploy-production:
+    name: Deploy to production
+    needs: [verify-release]
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy
+        run: __DEPLOY_COMMAND__ production

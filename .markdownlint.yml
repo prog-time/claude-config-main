@@ -46,7 +46,7 @@ MD033: false
 
 # MD036 — emphasis used instead of a heading
 # OFF: task files use **Type:**, **Size:**, **Status:** bold-label headers
-# in their frontmatter sections; this is the canonical task-writer format.
+# in their frontmatter sections; this is the canonical spec-writer format.
 MD036: false
 
 # MD040 — fenced code blocks should have a language specified

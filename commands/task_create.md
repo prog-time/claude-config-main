@@ -1,5 +1,5 @@
 ---
-description: Create a task file in tasks/ and a linked GitHub Issue via mcp-github-issues in one pass
+description: Create a task file in tasks/ and a linked GitHub Issue via the gh CLI in one pass
 argument-hint: <task description>
 contract: _contract.md
 ---
@@ -11,9 +11,9 @@ contract: _contract.md
 > override any loose natural-language reading inside the steps.
 
 Orchestrates end-to-end task creation: produces a TASK file via the
-`task-writer` agent, then creates a matching GitHub Issue by
-calling `mcp-github-issues` MCP tools directly, and writes the
-Issue number back into the task file header.
+`spec-writer` agent, validates that it matches the canonical format,
+then creates a matching GitHub Issue with the `gh` CLI, and writes
+the Issue number back into the task file header.
 
 See `_shared/workflow.md` for where `/task_create` sits in the
 overall chain.
@@ -23,32 +23,32 @@ overall chain.
 
 ## Workflow
 
-### Step 1 — Create the task file via `task-writer`
+### Step 1 — Create the task file via `spec-writer`
 
 **Preconditions:** `$ARGUMENTS` is non-empty.
-**Action:** invoke the `task-writer` agent via the Agent tool with
+**Action:** invoke the `spec-writer` agent via the Agent tool with
 `$ARGUMENTS` as the task description.
 
-**Fallback path.** If the registered `task-writer` subagent type is
-unavailable (e.g. `Agent type 'task-writer' not found`), re-invoke
+**Fallback path.** If the registered `spec-writer` subagent type is
+unavailable (e.g. `Agent type 'spec-writer' not found`), re-invoke
 with `subagent_type: "general-purpose"` and inline the spec. Locate
 it in this order:
 
-1. `agents/task-writer.md` (project-local)
-2. `~/.claude/agents/task-writer.md` (global)
+1. `agents/spec-writer.md` (project-local)
+2. `~/.claude/agents/spec-writer.md` (global)
 
 Brief the fallback agent:
 
-> You are acting as the **task-writer** agent (its registered
+> You are acting as the **spec-writer** agent (its registered
 > subagent type is unavailable in this session, so you're
 > executing its spec directly). Follow the spec below verbatim —
 > explore the project, classify type, pick estimate, fill every
 > template section, write the file in one pass, no confirmation.
-> Return only the task-writer's canonical 5-line output (Created /
+> Return only the spec-writer's canonical 5-line output (Created /
 > Title / Type / Estimate / Open questions).
 >
-> --- task-writer spec ---
-> {contents of task-writer.md}
+> --- spec-writer spec ---
+> {contents of spec-writer.md}
 > --- end spec ---
 >
 > User's task description: `$ARGUMENTS`
@@ -64,52 +64,66 @@ colon), `task_type` (`feature` | `bug` | `refactor` | `spike`),
   `error-templates.md#usage-missing-args` (`command=task_create`,
   `argument_hint=<task description>`).
 - Registered agent errors and the fallback spec is also missing →
-  STOP with `error-templates.md#mcp-call-failed`
-  (`tool=Agent[task-writer]`, `error=<verbatim>`).
+  STOP with `error-templates.md#tool-call-failed`
+  (`tool=Agent[spec-writer]`, `error=<verbatim>`).
 - Agent returns no file on disk → STOP with the same template.
 
 **Invariants after:** `task_file` exists on disk.
 
-### Step 2 — Verify MCP connectivity
+### Step 2 — Resolve the repo (gh preflight)
 
 **Preconditions:** Step 1 succeeded.
-**Action:** confirm the `mcp__mcp-github-issues__*` namespace is
-callable.
+**Action:** apply `_shared/repo-resolution.md`. This both confirms
+`gh` is installed and authenticated and yields the target repo.
+**Capture:** `repo_slug` (`owner/repo`).
+
+**Failure modes:** as defined in `_shared/repo-resolution.md`
+(`command=task_create`). The task file from Step 1 stays on disk
+untouched.
+
+### Step 3 — Validate the canonical format
+
+**Preconditions:** `task_file` exists; `repo_slug` resolved.
+**Action:** read `task_file` and confirm every required section of
+the `spec-writer` template is present, so the Issue body will be
+well-formed. Required:
+
+- Header lines `**Type:**`, `**Size:**`, `**Status:**`.
+- Section headers (verbatim): `## Что делаем`,
+  `## Пользователь получает`, `## Готово когда`, `## Как делаем`,
+  `## Файлы`, `## Не делаем в этой задаче`, `## Вопросы`,
+  `## Связанные задачи`, `## Критерии приёмки (Definition of Done)`.
+
+**Capture:** `missing_sections[]` (empty when valid).
 
 **Failure modes:**
-- Namespace unavailable → STOP with
-  `error-templates.md#mcp-not-connected`
-  (`command=task_create`). The task file from Step 1 stays on disk
-  untouched.
-
-### Step 3 — Resolve MCP project
-
-**Preconditions:** MCP connected.
-**Action:** apply `_shared/project-resolution.md`.
-**Capture:** `project` (string key).
-
-**Failure modes:** as defined in `_shared/project-resolution.md`.
+- One or more required sections absent → STOP with
+  `error-templates.md#issue-format-invalid` (`path={task_file}`,
+  `missing=<one "- {section}" line each>`). No Issue is created; the
+  task file stays on disk so the user can fix it.
 
 ### Step 4 — Prepare the Issue payload
 
-**Preconditions:** `task_file` exists; `project` resolved.
+**Preconditions:** `task_file` exists; `repo_slug` resolved.
 **Action:**
 
 1. Read `task_file` in full.
 2. The **Issue title** is `task_title` (captured in Step 1).
 3. The **Issue body** is the file contents verbatim, minus the H1
-   title line. No summarisation, no reformatting, no wrapper
-   text, no references back to the local path.
-4. The **type** for the MCP is mapped from `task_type`:
+   title line. Write it to a scratch file (e.g.
+   `{scratchpad}/issue-body.md`) for `--body-file`. No
+   summarisation, no reformatting, no wrapper text, no references
+   back to the local path.
+4. The **label** is mapped from `task_type`:
 
-   | task-writer `task_type` | MCP `type` |
+   | spec-writer `task_type` | gh `--label` |
    |---|---|
-   | `feature`  | `feature` |
-   | `bug`      | `bug`     |
-   | `refactor` | `task`    |
-   | `spike`    | `task`    |
+   | `feature`  | `enhancement` |
+   | `bug`      | `bug`         |
+   | `refactor` | `enhancement` |
+   | `spike`    | `enhancement` |
 
-**Capture:** `issue_title`, `issue_body`, `mcp_type`.
+**Capture:** `issue_title`, `body_file` (path), `issue_label`.
 
 **Forbidden in `issue_body`:**
 - Any reference, link, or mention of the local task file path
@@ -120,42 +134,35 @@ callable.
 **Failure modes:** none — this is a pure transformation step; any
 I/O failure surfaces in Step 5 or Step 6.
 
-### Step 5 — Create the draft
+### Step 5 — Create the Issue
 
 **Preconditions:** payload ready (Step 4).
-**Action:** call `mcp__mcp-github-issues__create_task_draft` with:
+**Action:** create the Issue in one pass — do **not** ask the user
+to confirm:
 
-- `project` — `project`
-- `title` — `issue_title`
-- `context` — `issue_body`
-- `type` — `mcp_type`
-- `checklist` — `[]`
-- `files` — `[]`
+```bash
+gh issue create -R {repo_slug} --title "{issue_title}" --body-file {body_file} --label {issue_label}
+```
 
-**Capture:** `draft_path` (absolute path returned by MCP).
+`gh` prints the new Issue URL on stdout. Capture it as `issue_url`
+and parse `issue_number` from the trailing `/issues/{N}`.
 
-**Failure modes:**
-- MCP call fails → STOP with
-  `error-templates.md#mcp-call-failed`
-  (`tool=create_task_draft`, `error=<verbatim>`). `task_file`
-  stays on disk.
+**Label fallback.** If `gh` fails *only* because the label does not
+exist in the repo (`could not add label: '<label>' not found`),
+retry the same command **without** `--label`. Record
+`label_applied = false` for the Step 8 note. Any other failure is a
+STOP.
 
-### Step 6 — Publish the Issue
-
-**Preconditions:** `draft_path` captured.
-**Action:** call `mcp__mcp-github-issues__publish_issue` with
-`project` and `draftFile=draft_path`. Do **not** ask the user to
-confirm — this command is one-pass.
-**Capture:** `issue_number` (integer), `issue_url` (string).
+**Capture:** `issue_number` (integer), `issue_url` (string),
+`label_applied` (boolean).
 
 **Failure modes:**
-- MCP call fails → STOP with
-  `error-templates.md#mcp-call-failed`
-  (`tool=publish_issue`, `error=<verbatim>`). `task_file` stays on
-  disk. Mention `draft_path` in the STOP message so the user can
-  retry publication manually.
+- `gh issue create` fails for any reason other than a missing label
+  → STOP with `error-templates.md#tool-call-failed`
+  (`tool=gh issue create`, `error=<verbatim>`). `task_file` stays on
+  disk so the user can retry.
 
-### Step 7 — Record the Issue number in the task file
+### Step 6 — Record the Issue number in the task file
 
 **Preconditions:** `issue_number` and `issue_url` captured.
 **Action:** edit `task_file` to insert a new line immediately after
@@ -173,9 +180,34 @@ content.
 
 **Failure modes:**
 - Edit fails (e.g., `**Status:**` line missing because the template
-  was altered) → do **not** STOP. The Issue was already published.
+  was altered) → do **not** STOP. The Issue was already created.
   Emit the Step 8 report with a `Header update:` note asking the
   user to paste the line manually.
+
+### Step 7 — Register the task in `github-tasks.json`
+
+**Preconditions:** `issue_url` captured; `task_file` exists.
+**Action:** at the repo root (`git rev-parse --show-toplevel`):
+
+- `github-tasks.json` **missing** → create it containing only this
+  record.
+- **Present and valid** → if `issue_url` is not a key, insert the
+  record; if it is a key with empty `local`, set `local` only;
+  otherwise leave the record untouched.
+
+```json
+"{issue_url}": { "status": "open", "local": "{task_file}" }
+```
+
+This links the Issue to its task file so `/task_sync` does not
+materialise a second `TASK-*-github-{N}.md` for it.
+**Capture:** `json_state` (`updated` | `failed`).
+
+**Failure modes:**
+- File exists but is malformed JSON, or the write fails → do
+  **not** STOP (the Issue already exists) and never rewrite the file
+  silently. Set `json_state = "failed"` and emit the Step 8 report
+  with a `JSON record:` note.
 
 ### Step 8 — Report
 
@@ -190,7 +222,7 @@ Type:          {task_type}
 Estimate:      {task_estimate}
 ```
 
-If Step 7 failed to edit the header, append after the report:
+If Step 6 failed to edit the header, append after the report:
 
 ```
 
@@ -199,20 +231,43 @@ Header update: manual — insert
 after `**Status:** todo` in {task_file}.
 ```
 
+If the label was dropped in Step 5 (`label_applied == false`),
+append:
+
+```
+
+Label: skipped — `{issue_label}` does not exist in {repo_slug}.
+Create the label and re-label the Issue manually if needed.
+```
+
+If Step 7 failed (`json_state == "failed"`), append:
+
+```
+
+JSON record: manual — add
+  "{issue_url}": { "status": "open", "local": "{task_file}" }
+to github-tasks.json (the file is malformed or could not be written).
+```
+
 **Capture:** none.
 **Failure modes:** none — this step is terminal.
 
 ## Rules (non-negotiable)
 
-- Never fabricate an Issue number or URL. If MCP does not return
+- Never fabricate an Issue number or URL. If `gh` does not return
   them, STOP.
-- Never duplicate the task file. `task-writer` writes once; this
+- Never duplicate the task file. `spec-writer` writes once; this
   command only edits the header.
 - Never delete the task file on any failure. The user may retry.
 - Never commit or push. Commits and PRs are out of scope.
-- Never fall back to `gh` CLI. MCP-only.
+- `github-tasks.json` is only ever extended (Step 7): never change
+  an existing record's `status` or a non-empty `local`.
+- GitHub access is `gh` CLI only. The Issue targets the `origin`
+  repository (`repo_slug`); never reintroduce a project registry.
 - Issue body mirrors the local task file verbatim. No links back to
   the local path.
-- No interactive confirmation between draft and publish. One pass.
-- `task-writer` is the template source of truth. This command does
+- Format gate (Step 3) is mandatory: a task file missing canonical
+  sections never becomes an Issue.
+- One pass: no interactive confirmation before creating the Issue.
+- `spec-writer` is the template source of truth. This command does
   not reshape sections.

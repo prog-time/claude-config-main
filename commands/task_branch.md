@@ -1,5 +1,5 @@
 ---
-description: Verify a clean tree, sync main, and create or re-enter the issues-{N} branch for a task
+description: Verify a clean tree, sync develop, and create or re-enter the issues-{N} branch for a task
 argument-hint: <tasks/TASK-*.md path | GitHub issue URL>
 contract: _contract.md
 ---
@@ -12,8 +12,8 @@ contract: _contract.md
 
 Prepares the git branch for a task: resolves the Issue number from
 the input, verifies the working tree is clean, fetches and syncs
-`main`, then creates or re-enters the canonical `issues-{N}`
-branch.
+`develop` (the integration branch — see `_shared/repo-resolution.md`),
+then creates or re-enters the canonical `issues-{N}` branch.
 
 Does **not** run the task pipeline — that belongs to
 `/task_complete`. See `_shared/workflow.md` for the full chain.
@@ -47,16 +47,28 @@ behaviour is identical in either context.
 ### Step 1a — Resolve Issue number from URL
 
 **Preconditions:** `input_kind == url`.
-**Action:** match `task_source` against
-`https://github.com/{owner}/{repo}/issues/{N}` (strict).
-**Capture:** `issue_number` (integer `{N}`).
+**Action:**
+
+1. Match `task_source` against
+   `https://github.com/{owner}/{repo}/issues/{N}` (strict).
+2. Apply `_shared/repo-resolution.md` to get `repo_slug` (the
+   `origin` repository).
+3. Compare `{owner}/{repo}` with `repo_slug`, case-insensitively.
+
+**Capture:** `issue_number` (integer `{N}`), `repo_slug`.
 
 **Failure modes:**
 - URL does not match → STOP with
   `error-templates.md#malformed-issue-url` (`url={task_source}`).
+- Repo resolution fails → as defined in
+  `_shared/repo-resolution.md` (`command=task_branch`).
+- `{owner}/{repo}` differs from `repo_slug` → STOP with
+  `error-templates.md#issue-repo-mismatch` (`url={task_source}`,
+  `repo_slug={repo_slug}`). No branch is created.
 
-**Invariants after:** `issue_number ≥ 1`. No MCP call is made here;
-spec resolution is deferred to `/task_complete`.
+**Invariants after:** `issue_number ≥ 1` and the Issue belongs to
+the `origin` repository. Spec resolution is deferred to
+`/task_complete`.
 
 ### Step 1b — Resolve Issue number from local file
 
@@ -87,36 +99,44 @@ group, fall back to the trailing URL's `N`).
 
 **Invariants after:** `git status --porcelain` is empty.
 
-### Step 3 — Sync `main`
+### Step 3 — Sync `develop`
 
 **Preconditions:** clean working tree (Step 2).
 **Action:** run sequentially
 
 ```bash
-git switch main
 git fetch origin
-git pull --ff-only origin main
+git show-ref --verify --quiet refs/remotes/origin/develop
+git switch develop
+git pull --ff-only origin develop
 ```
 
 The `git fetch origin` is deliberate — it also refreshes
-`origin/issues-{N}`, which Step 4 consults. `--ff-only` refuses
-divergence silently; recovery is the user's decision.
+`origin/issues-{N}`, which Step 4 consults. When local `develop` does
+not exist yet, `git switch develop` creates it tracking
+`origin/develop`. `--ff-only` refuses divergence silently; recovery is
+the user's decision.
 **Capture:** none.
 
 **Failure modes:**
-- `git switch main` fails → STOP with
-  `error-templates.md#main-switch-failed` (`error=<verbatim>`).
-- `git pull --ff-only origin main` rejects non-fast-forward or
+- `git fetch origin` fails → STOP with
+  `error-templates.md#tool-call-failed` (`tool=git fetch`,
+  `error=<verbatim>`).
+- `refs/remotes/origin/develop` does not exist → STOP with
+  `error-templates.md#develop-missing`. Never fall back to `main`.
+- `git switch develop` fails → STOP with
+  `error-templates.md#develop-switch-failed` (`error=<verbatim>`).
+- `git pull --ff-only origin develop` rejects non-fast-forward or
   produces any error → STOP with
-  `error-templates.md#main-pull-failed` (`error=<verbatim>`).
+  `error-templates.md#develop-pull-failed` (`error=<verbatim>`).
 
-**Invariants after:** local `main` equals `origin/main`; remote
-refs are up to date, including `origin/issues-{issue_number}` if it
-exists.
+**Invariants after:** local `develop` equals `origin/develop`;
+remote refs are up to date, including `origin/issues-{issue_number}`
+if it exists.
 
 ### Step 4 — Create or re-enter `issues-{N}`
 
-**Preconditions:** on `main`, remote refs fresh (Step 3).
+**Preconditions:** on `develop`, remote refs fresh (Step 3).
 **Action:** determine whether the branch already exists (locally or
 remotely):
 
@@ -130,11 +150,11 @@ Then:
 - **Neither local nor remote** → `git switch -c issues-{N}`.
   `branch_state = "new"`.
 - **Local exists** (regardless of remote) → `git switch issues-{N}`
-  then `git merge --ff-only main`; if that fails,
-  `git merge main`.
+  then `git merge --ff-only develop`; if that fails,
+  `git merge develop`.
   `branch_state = "existing"`.
 - **Only remote exists** → `git switch -c issues-{N} origin/issues-{N}`
-  to track it, then `git merge --ff-only main` (or regular merge on
+  to track it, then `git merge --ff-only develop` (or regular merge on
   failure).
   `branch_state = "existing"`.
 
@@ -149,7 +169,7 @@ Then:
   `error=<verbatim>`). Do not auto-abort.
 
 **Invariants after:** current branch is exactly `issues-{N}`;
-contains every commit on `main`.
+contains every commit on `develop`.
 
 ### Step 5 — Report
 
@@ -180,7 +200,9 @@ the `Next:` field.
 - Branch name is literal `issues-{N}`. No slugs, no prefixes.
 - No auto-stash, auto-commit, `reset --hard`, `merge --abort`, or
   other destructive recovery.
-- No MCP call. `/task_branch` does not need the Issue body — only
-  the number.
+- Base is always `develop`. Never branch from or merge `main`; if
+  `origin/develop` is missing, STOP.
+- No Issue body fetch. `/task_branch` needs only the number (and,
+  for a URL, that the Issue lives in the `origin` repo).
 - No pipeline. `team-lead`, commits, push, and PR are out of scope.
 - Remote branch `issues-{N}` is tracked, never overwritten.

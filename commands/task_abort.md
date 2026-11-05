@@ -53,13 +53,19 @@ paragraph). Passed verbatim into the Issue comment.
 ### Step 3 — Check for unpushed work and confirm
 
 **Preconditions:** on `issues-{N}`.
-**Action:** compute
+**Action:** check whether the remote branch exists, then compute
+the unpushed count and tree state:
 
 ```bash
-git fetch origin issues-{N}
-git rev-list --count origin/issues-{N}..HEAD   # or HEAD if no remote
+git ls-remote --exit-code --heads origin issues-{N}
 git status --porcelain
 ```
+
+- Exit `0` → run `git fetch origin issues-{N}` and
+  `git rev-list --count origin/issues-{N}..HEAD`.
+- Exit `2` (no such ref) → do **not** fetch the branch; run
+  `git rev-list --count origin/develop..HEAD` (every commit on the
+  branch is local-only).
 
 If the branch has local-only commits **or** the working tree is
 dirty, ask the user exactly:
@@ -76,45 +82,40 @@ template; this is a user-choice abort, not a failure).
 (boolean).
 
 **Failure modes:**
-- `git fetch` fails → STOP with
-  `error-templates.md#mcp-call-failed`
-  (`tool=git fetch`, `error=<verbatim>`). (Re-using the template
-  for symmetry.)
+- `git ls-remote` exits with anything other than `0` or `2`, or
+  `git fetch` fails → STOP with
+  `error-templates.md#tool-call-failed`
+  (`tool=git ls-remote` or `tool=git fetch`, `error=<verbatim>`).
 
-### Step 4 — Resolve MCP project
+### Step 4 — Resolve the repo (gh preflight)
 
 **Preconditions:** user confirmed (or nothing unpushed).
-**Action:** apply `_shared/project-resolution.md`.
-**Capture:** `project` (string key).
+**Action:** apply `_shared/repo-resolution.md`. This confirms `gh`
+is available and authenticated and yields the target repo.
+**Capture:** `repo_slug` (`owner/repo`).
 
-**Failure modes:**
-- MCP unavailable → STOP with
-  `error-templates.md#mcp-not-connected`
-  (`command=task_abort`).
+**Failure modes:** as defined in `_shared/repo-resolution.md`
+(`command=task_abort`).
 
 ### Step 5 — Comment the Issue
 
-**Preconditions:** `project` resolved.
-**Action:** call `mcp__mcp-github-issues__add_comment` with:
+**Preconditions:** `repo_slug` resolved.
+**Action:** post the comment on the Issue:
 
-- `project` — `project`
-- `issue` — `issue_number`
-- `body` — exactly:
+```bash
+gh issue comment {issue_number} -R {repo_slug} --body "/task_abort: {reason}"
+```
 
-  ```
-  /task_abort: {reason}
-  ```
-
-  The `/task_abort:` prefix is deliberate — it lets humans and
-  future `/task_sync` runs recognise the record.
+The `/task_abort:` prefix is deliberate — it lets humans and future
+`/task_sync` runs recognise the record.
 
 **Capture:** `comment_posted` (boolean).
 
 **Failure modes:**
-- MCP call fails → STOP with
-  `error-templates.md#mcp-call-failed`
-  (`tool=add_comment`, `error=<verbatim>`). Do **not** proceed to
-  Step 6; the branch is still on disk.
+- `gh issue comment` fails → STOP with
+  `error-templates.md#tool-call-failed`
+  (`tool=gh issue comment`, `error=<verbatim>`). Do **not** proceed
+  to Step 6; the branch is still on disk.
 
 **Invariants after:** the Issue has a comment explaining why the
 branch is being abandoned.
@@ -125,7 +126,7 @@ branch is being abandoned.
 **Action:** sequentially
 
 ```bash
-git switch main
+git switch develop
 git branch -D issues-{N}
 ```
 
@@ -136,10 +137,10 @@ where force-delete is permitted.
 **Capture:** `branch_deleted` (boolean).
 
 **Failure modes:**
-- `git switch main` fails → STOP with
-  `error-templates.md#main-switch-failed` (`error=<verbatim>`).
+- `git switch develop` fails → STOP with
+  `error-templates.md#develop-switch-failed` (`error=<verbatim>`).
 - `git branch -D` fails → STOP with
-  `error-templates.md#mcp-call-failed`
+  `error-templates.md#tool-call-failed`
   (`tool=git branch -D`, `error=<verbatim>`).
 
 **Invariants after:** local branch `issues-{N}` no longer exists;
@@ -198,5 +199,6 @@ JSON record:   {json_state}
   uncommitted work. No `--yes` flag.
 - Force-delete (`git branch -D`) is allowed **only in Step 6**, and
   only after Step 3 confirmation.
-- Never use `gh` CLI.
+- GitHub access is `gh` CLI only, against the `origin`
+  repository. No project registry.
 - Never `--force` push or rewrite remote history.

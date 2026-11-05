@@ -13,8 +13,8 @@ omissions except where the template marks a field optional.
 - **Tag order is `[new | existing]`**, never the reverse.
 - **Em dash `—`** separates URL from tag: `Pull Request: <url> — [new]`.
 - **`----` (four hyphens on their own line)** separates the
-  compact header from any embedded sub-report (e.g. team-lead's
-  Project Execution Report).
+  compact header from any embedded sub-report (e.g. the team-lead
+  skill's JSON result).
 - **No trailing prose.** After the report, emit nothing.
 - Missing-but-expected fields are rendered as `—` (em dash), not
   `N/A` or blank. Truly optional fields are omitted entirely.
@@ -51,10 +51,10 @@ GitHub Issue:  #{N}
 Branch:        issues-{N}   [new | existing]
 Pull Request:  {pr_url} — [new | existing]
 ----
-<team-lead Project Execution Report, verbatim>
+<team-lead skill JSON result, verbatim>
 ```
 
-**Blocked variant** (pipeline ended `blocked` / `partial`, delivery
+**Blocked variant** (team-lead outcome `blocked` / `partial`, delivery
 skipped):
 
 ```
@@ -63,7 +63,7 @@ GitHub Issue:  #{N}
 Branch:        issues-{N}   [new | existing]
 Delivery:      skipped — team-lead outcome `{outcome}`
 ----
-<team-lead Project Execution Report, verbatim>
+<team-lead skill JSON result, verbatim>
 ```
 
 ## `task_submit`
@@ -105,6 +105,26 @@ Replace `Input` / `Status` with the fields that make sense for
 your derived command. Keep labels left-aligned and padded to
 15 characters.
 
+## `prog_time_writer`
+
+Fields (all required):
+
+```
+Topic:         {chosen_topic}
+Source idea:   {snipp_source_url}
+Article file:  {article_path}
+Title:         {article_title}
+Category:      {category_name} — #{category_id}
+Dup check:     {count} compared — no near-match
+Post:          {post_url} — [new]
+Status:        draft
+```
+
+`Post` always carries the `[new]` tag — the command only ever
+creates a fresh draft, never reuses one. `Status` is always `draft`;
+this command never publishes publicly. `Source idea` is the snipp.ru
+URL that seeded the article.
+
 ## `task_sync`
 
 Multi-section report (the only free-form template). The sections
@@ -134,5 +154,5 @@ Notes:
     carries no size metadata).
 
 Errors:
-  #{N} — {MCP or filesystem error}
+  #{N} — {gh or filesystem error}
 ```
