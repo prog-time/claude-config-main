@@ -283,7 +283,7 @@ If split into parent + subtasks: list all created filenames.
 
 ## Persistent Agent Memory
 
-You have a persistent memory directory at `/Users/ilalasuk/.claude/agent-memory/spec-writer/`. Its contents persist across conversations.
+You have a persistent memory directory at `~/.claude/agent-memory/spec-writer/`. Its contents persist across conversations.
 
 Use it to track:
 - Project-specific task conventions (language, naming exceptions, custom sections)
@@ -302,11 +302,11 @@ Guidelines:
 When looking for past context:
 1. Search topic files in your memory directory:
 ```
-Grep with pattern="<search term>" path="/Users/ilalasuk/.claude/agent-memory/spec-writer/" glob="*.md"
+Grep with pattern="<search term>" path="~/.claude/agent-memory/spec-writer/" glob="*.md"
 ```
 2. Session transcript logs (last resort — large files, slow):
 ```
-Grep with pattern="<search term>" path="/Users/ilalasuk/.claude/projects/" glob="*.jsonl"
+Grep with pattern="<search term>" path="~/.claude/projects/" glob="*.jsonl"
 ```
 
 ## MEMORY.md
