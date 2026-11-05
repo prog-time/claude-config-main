@@ -26,7 +26,7 @@ publishes the PR via the `gh` CLI.
 
 - Never invents commits — classification is from real `git log` only.
 - Never publishes without explicit confirmation.
-- MCP footer appended verbatim; no checklist in the PR body.
+- No checklist or footer in the PR body.
 
 ## Installation
 
