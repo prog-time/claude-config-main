@@ -22,6 +22,9 @@ Issue #N
   disabled.
 - **An open Issue means "not yet in production".** `Closes #N` does not fire on
   a PR into `develop`; `git-release` closes finished Issues when it publishes.
+- **PRs opened by a human.** Claude gives the compare link in the chat:
+  `https://github.com/{owner/repo}/compare/{base}...{head}`, for example
+  `compare/main...develop` for a release.
 - **Hotfix.** Branch `issues-N` from `main`; a human opens the PR into `main`.
   The sync workflow then brings the fix into `develop`.
 - **Versions** follow SemVer (`git-release` recommends the bump).

@@ -100,7 +100,8 @@ closes the listed Issues)*
 - **No previous tag** — fall back to `git log origin/main --oneline --no-merges`
   (all commits) and note this in the output.
 - **Nothing since the previous tag** — report that `main` has nothing to
-  release and that `develop` must reach `main` first (a human opens that PR). Do
+  release and that `develop` must reach `main` first. A human opens that PR: give
+  the link `https://github.com/{owner/repo}/compare/main...develop`. Do
   not fabricate notes.
 - **Ambiguous version bump** — default to patch and ask the user to confirm if
   any changes look like features or breaking changes.
