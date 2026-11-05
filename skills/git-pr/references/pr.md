@@ -99,10 +99,6 @@ Closes #{N}
 [Optional. Fill with trade-offs, risks, migration steps, or uncertain areas
 inferred from the diff. If nothing stands out, write:
 "No significant risks identified."]
-
----
-
-_The task was generated using the MCP server — [prog-time/mcp-github-issues](https://github.com/prog-time/mcp-github-issues)._
 ```
 
 ### Auto-fill rules
@@ -110,8 +106,6 @@ _The task was generated using the MCP server — [prog-time/mcp-github-issues](h
 - **`Closes #{N}`** — extract `{N}` from the current branch
   (`^issues-(\d+)$`). If the branch does not match, leave `Closes #` and warn
   the user that the issue number must be filled manually.
-- **MCP footer** — always append the footer verbatim. It's a static marker
-  identifying this repo's task-origin workflow.
 
 ## Publishing via `gh` CLI (Mode F)
 
@@ -131,5 +125,4 @@ gh pr create -R {origin_repo} --title "{title}" --body "{generated_description}"
 - [ ] `Closes #{N}` was auto-filled from the current branch name (or a warning
       was raised)
 - [ ] No `## Checklist` section in the PR body
-- [ ] MCP footer is appended verbatim
 - [ ] No publishing action was taken without explicit user confirmation

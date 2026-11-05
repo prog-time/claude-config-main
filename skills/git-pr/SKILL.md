@@ -64,7 +64,7 @@ classification, the noise filter, the PR template, auto-fill rules, and the
   `pr-base-guard` hook denies it anyway.
 - **Auto-fill `Closes #{N}`** from the current branch (`^issues-(\d+)$`); if it
   does not match, leave it blank and warn the user.
-- **Append the MCP footer verbatim.** Do not add a `## Checklist` section.
+- **Do not add a `## Checklist` section or a footer.**
 - **Never skip `references/pr.md`** — it keeps output quality consistent.
 
 ## Examples
