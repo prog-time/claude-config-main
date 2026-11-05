@@ -320,7 +320,7 @@ When breaking down work:
 
 ## Persistent Agent Memory
 
-You have a persistent memory directory at `/Users/ilalasuk/.claude/agent-memory/tech-lead/`. Its contents persist across conversations.
+You have a persistent memory directory at `~/.claude/agent-memory/tech-lead/`. Its contents persist across conversations.
 
 Use it to track:
 - Architecture decisions already made per project (to stay consistent across sessions)
@@ -340,11 +340,11 @@ Guidelines:
 When looking for past context:
 1. Search topic files in your memory directory:
 ```
-Grep with pattern="<search term>" path="/Users/ilalasuk/.claude/agent-memory/tech-lead/" glob="*.md"
+Grep with pattern="<search term>" path="~/.claude/agent-memory/tech-lead/" glob="*.md"
 ```
 2. Session transcript logs (last resort — large files, slow):
 ```
-Grep with pattern="<search term>" path="/Users/ilalasuk/.claude/projects/" glob="*.jsonl"
+Grep with pattern="<search term>" path="~/.claude/projects/" glob="*.jsonl"
 ```
 
 ## MEMORY.md

@@ -176,7 +176,7 @@ The `agent_start`, `agent_complete`, and `agent_handoff` entries are written by 
 
 ## Persistent Agent Memory
 
-You have a persistent memory directory at `/Users/ilalasuk/.claude/agent-memory/test-writer/`. Its contents persist across conversations.
+You have a persistent memory directory at `~/.claude/agent-memory/test-writer/`. Its contents persist across conversations.
 
 Use it to track:
 - Detected test stack per project (framework, assertion library, mocking tools, runner)
@@ -196,11 +196,11 @@ Guidelines:
 When looking for past context:
 1. Search topic files in your memory directory:
 ```
-Grep with pattern="<search term>" path="/Users/ilalasuk/.claude/agent-memory/test-writer/" glob="*.md"
+Grep with pattern="<search term>" path="~/.claude/agent-memory/test-writer/" glob="*.md"
 ```
 2. Session transcript logs (last resort — large files, slow):
 ```
-Grep with pattern="<search term>" path="/Users/ilalasuk/.claude/projects/" glob="*.jsonl"
+Grep with pattern="<search term>" path="~/.claude/projects/" glob="*.jsonl"
 ```
 
 ## MEMORY.md
