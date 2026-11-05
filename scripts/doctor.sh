@@ -11,6 +11,9 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 FAIL_COUNT=0
 
+# shellcheck disable=SC1091
+INSTALL_SH_LIB=1 source "$REPO/install.sh"
+
 ok()   { printf "[OK]   %s\n" "$*"; }
 warn() { printf "[WARN] %s\n" "$*"; }
 fail() { printf "[FAIL] %s\n" "$*"; FAIL_COUNT=$((FAIL_COUNT + 1)); }
@@ -66,6 +69,7 @@ for cat in "${CATEGORIES[@]}"; do
   shopt -s nullglob
   for entry in "$src_root"/*; do
     name="$(basename "$entry")"
+    is_skipped "$cat" "$name" && continue
     dst="$dst_root/$name"
     if [[ -L "$dst" ]]; then
       target="$(readlink "$dst")"
@@ -78,6 +82,16 @@ for cat in "${CATEGORIES[@]}"; do
       warn "$dst exists but is not a symlink — run 'make install' to review"
     else
       fail "missing symlink $cat/$name — run 'make install'"
+    fi
+  done
+  for dst in "$dst_root"/* "$dst_root"/.[!.]*; do
+    [[ -L "$dst" ]] || continue
+    target="$(readlink "$dst")"
+    [[ "$target" == "$src_root/"* ]] || continue
+    if [[ ! -e "$target" ]]; then
+      warn "stale symlink $cat/$(basename "$dst") -> '$target' — run 'make prune'"
+    elif is_skipped "$cat" "${target#"$src_root/"}"; then
+      warn "symlink $cat/$(basename "$dst") points to a skipped entry — run 'make prune'"
     fi
   done
   shopt -u nullglob
