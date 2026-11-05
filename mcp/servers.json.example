@@ -1,14 +1,3 @@
 {
-  "mcpServers": {
-    "mcp-github-issues": {
-      "command": "<NODE_BIN_PATH>",
-      "args": [
-        "<MCP_GITHUB_ISSUES_PATH>/node_modules/.bin/tsx",
-        "<MCP_GITHUB_ISSUES_PATH>/src/server.ts"
-      ],
-      "env": {
-        "GITHUB_TOKEN": "<GITHUB_TOKEN>"
-      }
-    }
-  }
+  "mcpServers": {}
 }
