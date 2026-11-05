@@ -29,6 +29,7 @@ hooks/       PreToolUse / PostToolUse hooks, etc.
 templates/   shared boilerplate (README, CHANGELOG, PR/issue templates)
 docs/        conventions, guides, changelog
 scripts/     utilities: linter, new-skill generator
+global/      files linked into ~/.claude itself: the global CLAUDE.md
 ```
 
 The repository is mounted into `~/.claude/` via symlinks. Any change in the repo is
