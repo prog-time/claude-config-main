@@ -28,12 +28,12 @@ flow.
 the invocation prompt:
 
 - `team_lead_report` — free-form text summarising what the pipeline
-  did; used as the PR body source when present.
+  did; used as the source of the PR body's `## Summary` when present.
 - `issue_number_expected` — integer; when present, Step 1 must
   match this exact number, not just any `issues-{N}` pattern.
 
 Absent these, `/task_submit` falls back to standalone behaviour
-(body from commit log, any `issues-{N}` accepted).
+(summary from commit log, any `issues-{N}` accepted).
 
 ## Workflow
 
@@ -217,12 +217,15 @@ gh pr list -R {repo_slug} --head issues-{N} --state open \
 - Otherwise → create it:
   - **title:** the GitHub Issue title, from
     `gh issue view {N} -R {repo_slug} --json title --jq .title`.
-  - **body:** chosen per invocation context:
-    - `team_lead_report` present → use its summary (first paragraph
-      or an explicitly marked `## Summary` section).
-    - otherwise → generate from
-      `git log origin/develop..HEAD --pretty='- %s'`.
-    - always append a final line: `Closes #{issue_number}`.
+  - **body:** read `~/.claude/skills/git-pr/references/pr.md` and fill
+    its PR Description Template, consolidation rules, and auto-fill
+    rules, so every generated PR has the same shape. Source of
+    `## Summary`, per invocation context:
+    - `team_lead_report` present → its summary (first paragraph or an
+      explicitly marked `## Summary` section).
+    - otherwise → the commits in `git log origin/develop..HEAD`.
+
+    `## Linked issues` carries `Closes #{issue_number}`.
   - write the body to a scratch file and run:
 
     ```bash

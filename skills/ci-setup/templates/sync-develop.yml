@@ -1,0 +1,26 @@
+# Keeps develop up to date with main after a release or hotfix. A merge conflict
+# fails this run and has to be resolved by hand.
+name: sync-develop
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-depth: 0
+      - name: Merge main into develop
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git merge --no-edit origin/main
+          git push origin develop

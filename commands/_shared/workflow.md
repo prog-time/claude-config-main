@@ -4,6 +4,34 @@ This file is the authoritative description of how the `/task_*`
 commands chain together. Each command's body references it rather
 than restating the whole flow.
 
+## Git flow
+
+```text
+Issue #N
+  └─ issues-N (from develop)     one Issue = one branch = one PR
+       └─ PR → develop (squash)  CI checks; one commit per task
+            └─ PR develop → main (merge commit, opened by a human)
+                 ├─ test deploy, then main syncs back into develop
+                 └─ tag vX.Y.Z   production deploy, release notes, Issues closed
+```
+
+- **One topic per branch.** Unrelated work found along the way gets its own
+  Issue, not a commit on the current branch.
+- **Merge methods.** Squash into `develop`; a regular merge commit into `main`,
+  because the `git-release` Issue audit relies on that ancestry. Rebase merge is
+  disabled.
+- **An open Issue means "not yet in production".** `Closes #N` does not fire on
+  a PR into `develop`; `git-release` closes finished Issues when it publishes.
+- **PRs opened by a human.** Claude gives the compare link in the chat:
+  `https://github.com/{owner/repo}/compare/{base}...{head}`, for example
+  `compare/main...develop` for a release.
+- **Hotfix.** Branch `issues-N` from `main`; a human opens the PR into `main`.
+  The sync workflow then brings the fix into `develop`.
+- **Versions** follow SemVer (`git-release` recommends the bump).
+- **Enforcement.** `git-process.yml` checks branch names and commit prefixes on
+  every PR; `sync-develop.yml` merges `main` into `develop` on every push to
+  `main`. Templates live in `skills/ci-setup/templates/`.
+
 ## Canonical flow (happy path)
 
 ```
@@ -79,7 +107,8 @@ else is allowed (see `_contract.md` §8):
    immediately after `**Status:** todo`.
 4. **`github-tasks.json`.** Single JSON object keyed by full Issue
    URL. Managed by `/task_sync` and `/task_abort`; `/task_create`
-   only inserts the record for the Issue it just opened. Other
+   only inserts the record for the Issue it just opened; the
+   `git-release` skill marks the records of Issues it closes. Other
    commands do not touch it.
 5. **GitHub state.** Issues, comments, PRs via the `gh` CLI,
    targeting the `origin` repository (`owner/repo` from
@@ -112,7 +141,8 @@ else is allowed (see `_contract.md` §8):
   unauthenticated, STOP.
 - **Reopening / closing GitHub Issues.** `/task_sync` comments only.
   `/task_abort` comments + (optionally) closes explicitly. No other
-  command mutates Issue state.
+  command mutates Issue state; outside the commands, the `git-release`
+  skill closes finished Issues when it publishes a release.
 - **Automatic status transitions in task files.** The `**Status:**`
   field in `tasks/*.md` is informational and currently
   unmaintained; the live status lives in `github-tasks.json`.
@@ -126,10 +156,10 @@ receives additional context that changes two decisions:
   (cheap, and the contract says each command is self-contained),
   but the failure message points at `/task_complete`, not at
   `/task_create`.
-- **PR body source** — when the caller is `/task_complete` and a
-  `team_lead_report` is available, `/task_submit` uses its summary
-  as the PR body. Otherwise it generates the body from
-  `git log origin/develop..HEAD`.
+- **PR summary source** — the body always follows the `git-pr`
+  template. When the caller is `/task_complete` and a
+  `team_lead_report` is available, `## Summary` comes from it.
+  Otherwise it comes from `git log origin/develop..HEAD`.
 
 This signal is passed as a named variable in the invocation prompt;
 see `/task_complete`'s delivery step for the exact shape.

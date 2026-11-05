@@ -43,7 +43,9 @@ classification, the noise filter, the PR template, auto-fill rules, and the
   project. Do not fall back to `main` / `master`.
 - `publish` accepts only `develop` as `{target}`. Any other target (`main`,
   `master`, …) → refuse: say that PRs from Claude Code always target `develop`
-  and PRs into `main` are opened by humans. `desc` may describe any target.
+  and PRs into `main` are opened by humans. Give the compare link for the human
+  to open it: `https://github.com/{owner/repo}/compare/{target}...{branch}`.
+  `desc` may describe any target.
 - The repository is always the `origin` remote: pass
   `-R "$(gh repo view "$(git remote get-url origin)" --json nameWithOwner -q .nameWithOwner)"`
   to `gh`.
@@ -64,7 +66,7 @@ classification, the noise filter, the PR template, auto-fill rules, and the
   `pr-base-guard` hook denies it anyway.
 - **Auto-fill `Closes #{N}`** from the current branch (`^issues-(\d+)$`); if it
   does not match, leave it blank and warn the user.
-- **Append the MCP footer verbatim** and emit the checklist with empty boxes.
+- **Do not add a `## Checklist` section or a footer.**
 - **Never skip `references/pr.md`** — it keeps output quality consistent.
 
 ## Examples
@@ -90,8 +92,9 @@ confirmation, then runs `gh pr create -R {origin repo} --base develop --body "..
 
 **User:** git-agent publish pr issues-6 -> main
 
-**Assistant:** *(refuses: PRs from Claude Code always target `develop`; offers
-`git-agent publish pr issues-6 -> develop` instead)*
+**Assistant:** *(refuses: PRs from Claude Code always target `develop`; gives the
+link `https://github.com/{owner/repo}/compare/main...issues-6` for the human to
+open it, and offers `git-agent publish pr issues-6 -> develop` instead)*
 
 ## Edge Cases
 
