@@ -31,6 +31,9 @@ security as a gate on every change, not as a review afterthought.
 
   Placeholders like `<GITHUB_TOKEN>` and regex examples in docs are fine. A
   real-looking value is not: stop and ask the user.
+- Before every push, run `bash linting/pre-push-check.sh`. It runs gitleaks on
+  the commits not yet on `origin/develop`, and CI runs it again on every PR. Add
+  a false positive to `.gitleaks.toml` only with the user's consent.
 
 ## If a secret was committed
 
