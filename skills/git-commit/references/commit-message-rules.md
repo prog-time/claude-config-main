@@ -4,7 +4,16 @@ Applies to Modes A (atomic commit workflow) and B (hook output).
 
 ## Rules — strictly enforced (all languages)
 
-- **Single line** — subject line only. No body, no bullet points.
+- **Single subject line.** No free-form body and no bullet points. The only
+  allowed body is the trailer block below.
+- **Trailers (body, optional).** After one blank line, only these lines are
+  allowed, one per line:
+  - `Root cause: <one sentence>` for a bug fix, as the bug DoD requires.
+  - `Rules-Skip: <api|database|architecture> — <reason>` when code listed in
+    `rules/sync.yml` changed on purpose without its schema.
+
+  Pass them with a second `-m`: `git commit -m "issues-42|fix double charge" -m "Root cause: retry ran without an idempotency key"`.
+  Mode B (hook output) still prints the subject line only.
 - **Max 72 characters** for the subject line, **including the
   `issues-{N}|` prefix**.
 - **Mandatory `issues-{N}|` prefix** — see next section.
@@ -116,7 +125,7 @@ issues-12|сброс пароля добавлен           ← passive voice (
 - [ ] `git diff --cached` was read — message reflects actual staged
       changes
 - [ ] Single line, max 72 characters **including** the `issues-{N}|`
-      prefix
+      prefix (Mode B never prints trailers)
 - [ ] Language matches the command argument (default English)
 - [ ] No full file paths, no conventional-commit type prefix
 - [ ] Output is the message text only — no extra words, no markdown,
