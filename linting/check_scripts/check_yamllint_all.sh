@@ -1,23 +1,7 @@
-#!/bin/bash
-# ----------------------------------------
-# YAML Code Style Checker (Full Project)
-#
-# This script checks all YAML files
-# in the project for style issues using yamllint.
-# Used in pre-push-check.sh
-#
-# Usage:
-#   ./check_yamllint_all.sh
-# ----------------------------------------
-
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
-
-YAML_FILES=$(find "$PROJECT_DIR" -type f \( -name "*.yml" -o -name "*.yaml" \) -not -path "*/_site/*" -not -path "*/node_modules/*" -not -path "*/.git/*")
-
-if [ -z "$YAML_FILES" ]; then
-    echo "No YAML files found"
-    exit 0
-fi
-
-exec "$SCRIPT_DIR/check_yamllint.sh" $YAML_FILES
+#!/usr/bin/env bash
+# yamllint over the project with .yamllint.yml. Used by linting/pre-push-check.sh.
+set -euo pipefail
+cd "$(dirname "$0")/../.."
+command -v yamllint >/dev/null || { echo "yamllint not installed — skipped (pip install yamllint)"; exit 0; }
+yamllint .
+echo "yamllint: OK"
