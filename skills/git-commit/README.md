@@ -3,7 +3,7 @@
 Creates git commits on an `issues-{N}` branch. Two modes:
 
 - **A — Atomic commit workflow** (`commit`, `commit ru`, `закоммить`): analyzes
-  changes, groups them into atomic commits (max 3 files each), generates a
+  changes, groups them into atomic commits (max 3 files each, except one mechanical change), generates a
   message per group, and runs `git add` + `git commit`.
 - **B — Commit message only** (`git-agent desc commit [lang]`): pure raw-output
   mode for a git hook — the entire response is the commit message line, written

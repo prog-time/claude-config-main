@@ -89,7 +89,7 @@ Before entering any mode:
 ## Mode A — Atomic Commit Workflow
 
 Full workflow: analyze changes, filter forbidden files, group into atomic
-commits (max 3 files each), generate a message per group, run `git add` +
+commits (max 3 files each, except one mechanical change), generate a message per group, run `git add` +
 `git commit`.
 
 Never output the commit message as standalone text — it must only appear as the
@@ -100,7 +100,7 @@ narration.
 contains:
 
 - File filters (always-exclude and protected directories)
-- Grouping rules (max 3 files, relatedness criteria)
+- Grouping rules (max 3 files, mechanical-change exception, relatedness)
 - Author identity handling (no `Co-Authored-By`, no AI attribution)
 - Message rules (delegates to `references/commit-message-rules.md`)
 - Pre-commit hook behavior
