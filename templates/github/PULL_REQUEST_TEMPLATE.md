@@ -14,13 +14,6 @@
 
 Closes #
 
-## Checklist
-
-- [ ] Tests pass locally
-- [ ] Docs / CHANGELOG updated if behavior changed
-- [ ] No leftover debug code, prints, or stale TODOs
-- [ ] Breaking changes flagged in the summary
-
 ## Notes for reviewer
 
 <!-- Optional: trade-offs, areas of uncertainty, screenshots, migration steps. -->
