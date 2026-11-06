@@ -67,6 +67,31 @@ make prune          # удаляет наши симлинки, цель кот�
 `install.sh` не ставит dot-файлы, `__pycache__`, `commands/README.md` и
 `commands/*_example.md`. Иначе Claude Code показал бы последние два как слэш-команды.
 
+## Боевой клон и клон для разработки
+
+`make install` ставит в `~/.claude` ссылки на рабочее дерево того клона, из
+которого его запустили. Какая ветка в нём выбрана, такой конфиг и получают все
+сессии Claude. Переключение на ветку задачи меняет боевой конфиг. Поэтому нужны два клона:
+
+```bash
+# боевой: всегда на main, только он установлен
+git clone git@github.com:<you>/claude-config.git ~/.claude-config-live
+cd ~/.claude-config-live && make install
+
+# для разработки: ветки, задачи, PR; не устанавливается
+git clone git@github.com:<you>/claude-config.git ~/code/claude-config
+```
+
+После того как релиз попал в `main`, обновите боевой клон:
+
+```bash
+cd ~/.claude-config-live && git pull --ff-only && make prune
+```
+
+`make doctor` предупреждает, если `~/.claude` смотрит на клон не на `main` или с
+незакоммиченными изменениями. Чтобы перенести установку, выполните `make uninstall`
+в старом клоне, затем `make install` в боевом.
+
 ## Разработка нового скила
 
 ```bash

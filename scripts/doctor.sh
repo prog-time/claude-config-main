@@ -98,6 +98,32 @@ for cat in "${CATEGORIES[@]}"; do
 done
 
 # ---------------------------------------------------------------------------
+# 4b. Which clone the live config follows
+# ---------------------------------------------------------------------------
+# ~/.claude follows whatever branch the linked clone has checked out, so a
+# feature branch there changes every Claude session. Install from a clone on main.
+LIVE_REPO=""
+for probe in "$CLAUDE_HOME/CLAUDE.md" "$CLAUDE_HOME"/skills/* "$CLAUDE_HOME"/agents/*; do
+  [[ -L "$probe" ]] || continue
+  target="$(readlink "$probe")"
+  [[ -e "$target" ]] || continue
+  LIVE_REPO="$(git -C "$(dirname "$target")" rev-parse --show-toplevel 2>/dev/null || true)"
+  [[ -n "$LIVE_REPO" ]] && break
+done
+if [[ -z "$LIVE_REPO" ]]; then
+  warn "no installed links found — run 'make install' from the live clone"
+else
+  LIVE_BRANCH="$(git -C "$LIVE_REPO" branch --show-current 2>/dev/null || echo "?")"
+  if [[ "$LIVE_BRANCH" != "main" ]]; then
+    warn "live config follows $LIVE_REPO on '$LIVE_BRANCH', not main — install from a clone on main (see README)"
+  elif [[ -n "$(git -C "$LIVE_REPO" status --porcelain 2>/dev/null)" ]]; then
+    warn "live config clone $LIVE_REPO has uncommitted changes"
+  else
+    ok "live config follows $LIVE_REPO on main"
+  fi
+fi
+
+# ---------------------------------------------------------------------------
 # 5. MCP server config
 # ---------------------------------------------------------------------------
 MCP_CONFIG="$CLAUDE_HOME/mcp/servers.json"
