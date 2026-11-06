@@ -1,0 +1,12 @@
+# gitleaks config: default rules plus known, already-revoked findings.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Revoked GitHub token (d8bcd4e, removed in 92aead6); doc example 'sk_live_123456' in old rules templates"
+commits = [
+  "d8bcd4edcfd9a89351863cf415c04dd3aaeaaf88",
+  "92aead6b43b2901fc8f180e3b5f939ac05c71d7d",
+  "bc8eb15794e1934e48a9f3e1cfeb716512d98a3f",
+  "324912c658fe67c2f85feae161947a8c17255978",
+]

@@ -143,8 +143,11 @@ git add src/auth/login.ts src/auth/token.ts
 
 ### Core Rules (non-negotiable)
 
-1. **Maximum 3 files per commit — hard limit.** If a logical group has
-   4+ files, split it into smaller commits. No exceptions.
+1. **Maximum 3 files per commit.** If a logical group has 4+ files,
+   split it into smaller commits. **One exception: a mechanical change.**
+   The same edit applied across N files (a rename, a path or import
+   update, a formatting pass) is one commit, whatever N is, and contains
+   nothing else.
 2. **Only related files in one commit.** Files are related if they
    implement the same atomic change together (e.g. a service and its
    direct test). If you need to think hard about whether two files are
@@ -156,7 +159,7 @@ git add src/auth/login.ts src/auth/token.ts
 
 1. Start with the most cohesive pair: a file and its direct test, or two
    files that implement the same thing.
-2. A group may have 1, 2, or at most 3 files — never more.
+2. A group may have 1, 2, or at most 3 files, except a mechanical change (rule 1).
 3. Any file that does not fit goes into the next group or its own
    commit.
 4. Repeat until all files are assigned.
@@ -185,7 +188,9 @@ git add src/auth/login.ts src/auth/token.ts
 ## Step 6 — Generate Commit Message
 
 Analyze the diff of the specific group and generate a single-line
-message. Apply the per-language rules in
+subject. Add a trailer block only when it applies (`Root cause:` for a bug
+fix, `Rules-Skip:` for an intentional schema skip); see
+`references/commit-message-rules.md`. Apply the per-language rules in
 `references/commit-message-rules.md`.
 
 Prepend the `issues-{N}|` prefix captured in Step 1 — no spaces around
@@ -283,14 +288,14 @@ After printing the error:
       the user explicitly named them
 - [ ] Forbidden files are excluded
 - [ ] `git add .` and `git add -A` were not used
-- [ ] Every commit contains **3 files or fewer**
+- [ ] Every commit contains **3 files or fewer**, or is a single mechanical change
 - [ ] Every file in a commit is **directly related** to the others
 - [ ] Every unrelated file has been assigned its own separate commit
 - [ ] Commit size was minimized — 1–2 files preferred over 3
 - [ ] No mixed change types within a single commit
 - [ ] Language is English unless the user explicitly specified another
 - [ ] Message reflects actual changes from the diff
-- [ ] Single line, max 72 characters **including** the `issues-{N}|`
+- [ ] Subject is a single line, max 72 characters **including** the `issues-{N}|`
       prefix
 - [ ] No conventional-commit type prefix (`feat:`, `fix:`, etc.)
 - [ ] Commit message was passed directly to `git commit -m` — never

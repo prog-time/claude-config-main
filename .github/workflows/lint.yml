@@ -9,6 +9,23 @@ permissions:
   contents: read
 
 jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan commits for secrets with gitleaks
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          # PR: only its commits. Push to main: the whole history (allowlist in .gitleaks.toml).
+          range="HEAD"
+          if [[ -n "${BASE_SHA:-}" ]]; then range="$BASE_SHA..$HEAD_SHA"; fi
+          bash linting/check_scripts/check_secrets.sh "$range"
+
   tests:
     runs-on: ubuntu-latest
     steps:
