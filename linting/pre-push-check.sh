@@ -1,21 +1,16 @@
-#!/bin/bash
-
-echo "ShellCheck..."
-bash linting/check_scripts/check_shellcheck_all.sh
-echo "----------"
-
-echo "Markdown Code Style Checker..."
-bash linting/check_scripts/check_markdownlint_all.sh
-echo "----------"
-
-echo "YML/YAML Checker..."
-bash linting/check_scripts/check_yamllint_all.sh
-echo "----------"
-
-echo "HTML Code Checker..."
-bash linting/check_scripts/check_htmlhint_all.sh
-echo "----------"
-
-echo "CSS Code Style Checker..."
-bash linting/check_scripts/check_stylelint_all.sh
-echo "----------"
+#!/usr/bin/env bash
+# Runs every local check and fails if any of them fails.
+set -uo pipefail
+cd "$(dirname "$0")/.." || exit 1
+failed=()
+for check in shellcheck markdownlint yamllint; do
+  echo "== $check"
+  bash "linting/check_scripts/check_${check}_all.sh" || failed+=("$check")
+done
+echo "== secrets"
+bash linting/check_scripts/check_secrets.sh || failed+=("secrets")
+if [[ ${#failed[@]} -gt 0 ]]; then
+  echo "FAILED: ${failed[*]}"
+  exit 1
+fi
+echo "All checks passed."
