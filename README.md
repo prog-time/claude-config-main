@@ -69,6 +69,32 @@ make prune          # removes our symlinks whose target is gone from the repo
 `install.sh` never links dot-files, `__pycache__`, `commands/README.md`, or
 `commands/*_example.md`. Otherwise Claude Code would list the last two as slash commands.
 
+## Live clone and development clone
+
+`make install` links `~/.claude` to the working tree of the clone you run it
+from. Whatever branch that clone has checked out is what every Claude session
+gets, so switching to a feature branch there changes your live config. Use two
+clones:
+
+```bash
+# live: always on main, the only clone that is installed
+git clone git@github.com:<you>/claude-config.git ~/.claude-config-live
+cd ~/.claude-config-live && make install
+
+# development: branches, tasks, PRs; never installed
+git clone git@github.com:<you>/claude-config.git ~/code/claude-config
+```
+
+After a release reaches `main`, update the live clone:
+
+```bash
+cd ~/.claude-config-live && git pull --ff-only && make prune
+```
+
+`make doctor` warns when `~/.claude` follows a clone that is not on `main` or has
+uncommitted changes. To move an existing install, run `make uninstall` in the
+old clone, then `make install` in the live one.
+
 ## Adding a new skill
 
 ```bash
